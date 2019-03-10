@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senior Project Stock Tracker", "Senior Project Stock Tracker\Senior Project Stock Tracker.csproj", "{B40B2B84-C4FE-4D13-8632-4C9A6BFC316C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B40B2B84-C4FE-4D13-8632-4C9A6BFC316C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B40B2B84-C4FE-4D13-8632-4C9A6BFC316C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B40B2B84-C4FE-4D13-8632-4C9A6BFC316C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B40B2B84-C4FE-4D13-8632-4C9A6BFC316C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA5C0F8B-6694-4E67-BD22-6522846E9D31}
+	EndGlobalSection
+EndGlobal

@@ -30,15 +30,6 @@ namespace Senior_Project_Stock_Tracker
         private List<string> marketSectors = new List<string>();
 
         //NASDAQ
-        /*
-        //symbol, name
-        private Dictionary<string, string> NASDAQ_Name = new Dictionary<string, string>();
-        //symbol, ipoyear
-        private Dictionary<string, string> NASDAQ_IPOyear = new Dictionary<string, string>();
-        //symbol, sector
-        private Dictionary<string, string> NASDAQ_Sector = new Dictionary<string, string>();
-        //symbolr, industry
-        private Dictionary<string, string> NASDAQ_Industry = new Dictionary<string, string>();*/
         private Dictionary<string, NASDAQ_CSV_Data> NASDAQ_Data = new Dictionary<string, NASDAQ_CSV_Data>();
         private Dictionary<string, List<string>> mapSymbolToSector = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> mapNameToSymbol = new Dictionary<string, List<string>>();
@@ -95,6 +86,7 @@ namespace Senior_Project_Stock_Tracker
                 sectorsComboBox.Items.Add(sector);
         }
 
+        //add, fix and update. Change code below eventually...
         //NYSE
         //symbol, name
         private Dictionary<string, string> NYSE_Name = new Dictionary<string, string>();
@@ -196,52 +188,44 @@ namespace Senior_Project_Stock_Tracker
         private string symbolJSONreturn = "";
         private void button2_Click(object sender, EventArgs e)//testing chart stuff
         {
-            richTextBox1.Text = symbolJSONreturn;
-            RootData test = new RootData();
-            test = JsonConvert.DeserializeObject<RootData>(symbolJSONreturn);
+            //richTextBox1.Clear();
+            //richTextBox1.Text = symbolJSONreturn;
+            cartesianChart1.Series.Clear();
+            cartesianChart1.AxisX.Clear();
+            cartesianChart1.AxisY.Clear();
+            //testing
+            switch (timeSeriesFlag)
+            {
+                case "Intraday":
+                    RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
+                    intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
+                    loadIntradayToChart(intraday);
+                    break;
+                case "Daily":
+                    RootDaily daily = new RootDaily();//contains the daily & daily adj objs
+                    daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
+                    loadDailyToChart(daily);
+                    break;
+                case "Daily Adjusted":
+                    RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
+                    dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
+                    loadDailyToChart(dailyAdj);
+                    break;
+                case "Weekly":
+                case "Weekly Adjusted":
+                    RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
+                    weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
+                    break;
+                case "Monthly":
+                case "Monthly Adjusted":
+                    RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
+                    monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
+                    break;
+            }
             Console.WriteLine("Here");
-
-            //testing chart stuff
-            /*cartesianChart1.Series = new SeriesCollection
-            {
-                //lines and their values
-                new LineSeries
-                {
-                    Title = "Series 1",
-                    Values = new ChartValues<double> {4, 6, 5, 2, 7}
-                },
-                new LineSeries
-                {
-                    Title = "Series 2",
-                    Values = new ChartValues<double> {6, 7, 3, 4, 6},
-                    PointGeometry = null
-                },
-                new LineSeries
-                {
-                    Title = "Series 2",
-                    Values = new ChartValues<double> {5, 2, 8, 3},
-                    PointGeometry = DefaultGeometries.Square,
-                    PointGeometrySize = 15
-                }
-            };
-
-            //bottom x axis labels
-            cartesianChart1.AxisX.Add(new Axis
-            {
-                Title = "Month",
-                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
-            });
-
-            //left side y axis labels
-            cartesianChart1.AxisY.Add(new Axis
-            {
-                Title = "Sales",
-                LabelFormatter = value => value.ToString("C")
-            });
-
-            //right side legend
-            cartesianChart1.LegendLocation = LegendLocation.Right;*/
         }
+
+        //disable the time series interval combobox because the interval only applies to intraday, and is non existant in other time series json strings
 
         private void timeSeriesComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series
         {
@@ -250,24 +234,38 @@ namespace Senior_Project_Stock_Tracker
             {
                 case "Intraday":
                     selectedTimeSeries = "TIME_SERIES_INTRADAY";
+                    timeSeriesIntervalComboBox.Enabled = true;
+                    timeSeriesFlag = "Intraday";
                     break;
                 case "Daily":
                     selectedTimeSeries = "TIME_SERIES_DAILY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Daily";
                     break;
                 case "Daily Adjusted":
                     selectedTimeSeries = "TIME_SERIES_DAILY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Daily Adjusted";
                     break;
                 case "Weekly":
                     selectedTimeSeries = "TIME_SERIES_WEEKLY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Weekly";
                     break;
                 case "Weekly Adjusted":
                     selectedTimeSeries = "TIME_SERIES_WEEKLY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Weekly Adjusted";
                     break;
                 case "Monthly":
                     selectedTimeSeries = "TIME_SERIES_MONTHLY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Monthly";
                     break;
                 case "Monthly Adjusted":
                     selectedTimeSeries = "TIME_SERIES_MONTHLY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Monthly Adjusted";
                     break;
             }
             if(selectedCompany != null)
@@ -299,9 +297,165 @@ namespace Senior_Project_Stock_Tracker
                 checkForMultipleSymbols();
         }
 
-        /*private async void button1_Click(object sender, EventArgs e)
+        private void loadIntradayToChart(RootIntraday data)
         {
-            richTextBox1.Text = await updateCompanyListings(textBox1.Text);
-        }*/
+            double[] values = new double[100];
+            int counter = 0;
+            if (data.oneMin != null)
+            {
+                //change from open data. Not sure what data to use here for intraday
+                foreach (var key in data.oneMin.Keys)
+                {
+                    Console.WriteLine("Key: " + key + "\nOpen: " + data.oneMin[key].open);
+                    values[counter] = data.oneMin[key].open;
+                    counter++;
+                }
+            }
+            else if (data.fiveMin != null)
+            {
+                foreach (var key in data.fiveMin.Keys)
+                {
+                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.fiveMin[key].open);
+                }
+            }
+            else if (data.fifteenMin != null)
+            {
+                foreach (var key in data.fifteenMin.Keys)
+                {
+                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.fifteenMin[key].open);
+                }
+            }
+            else if (data.thirtyMin != null)
+            {
+                foreach (var key in data.thirtyMin.Keys)
+                {
+                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.thirtyMin[key].open);
+                }
+            }
+            else if (data.sixtyMin != null)
+            {
+                foreach (var key in data.sixtyMin.Keys)
+                {
+                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.sixtyMin[key].open);
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            cartesianChart1.Series = new SeriesCollection
+            {
+                //lines and their values
+                new LineSeries
+                {
+                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
+                    Values = new ChartValues<double> (values)
+                }
+            };
+
+            //bottom x axis labels
+            cartesianChart1.AxisX.Add(new Axis
+            {
+                Title = "Time",
+                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
+            });
+
+            //left side y axis labels
+            cartesianChart1.AxisY.Add(new Axis
+            {
+                Title = "Values",
+                LabelFormatter = value => value.ToString("C")
+            });
+
+            //right side legend
+            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+        }
+
+        private void loadDailyToChart(RootDaily data)
+        {
+            double[] values = new double[100];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    values[counter] = data.data[key].open;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            cartesianChart1.Series = new SeriesCollection
+            {
+                //lines and their values
+                new LineSeries
+                {
+                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
+                    Values = new ChartValues<double> (values)
+                }
+            };
+
+            //bottom x axis labels
+            cartesianChart1.AxisX.Add(new Axis
+            {
+                Title = "Time",
+                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
+            });
+
+            //left side y axis labels
+            cartesianChart1.AxisY.Add(new Axis
+            {
+                Title = "Values",
+                LabelFormatter = value => value.ToString("C")
+            });
+
+            //right side legend
+            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+        }
+
+        private void loadDailyToChart(RootDailyAdj data)
+        {
+            double[] values = new double[100];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    values[counter] = data.data[key].open;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+            
+            //stuff below is for chart. Needs fixed/updated
+
+            cartesianChart1.Series = new SeriesCollection
+            {
+                //lines and their values
+                new LineSeries
+                {
+                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
+                    Values = new ChartValues<double> (values)
+                }
+            };
+
+            //bottom x axis labels
+            cartesianChart1.AxisX.Add(new Axis
+            {
+                Title = "Time",
+                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
+            });
+
+            //left side y axis labels
+            cartesianChart1.AxisY.Add(new Axis
+            {
+                Title = "Values",
+                LabelFormatter = value => value.ToString("C")
+            });
+
+            //right side legend
+            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+        }
     }
 }

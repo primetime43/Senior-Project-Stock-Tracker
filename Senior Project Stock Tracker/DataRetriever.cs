@@ -28,9 +28,9 @@ namespace Senior_Project_Stock_Tracker
 {
     public class DataRetriever : Form
     {
-        //Use one static HttpClient for the whole app to use
         private static String programPath = Directory.GetCurrentDirectory();
         private static HttpClient httpClient = new HttpClient();
+        public string timeSeriesFlag;
 
         protected static async Task<string> retrieveSymbolData(string timeSeries, string stockSymbol, string interval)
         {
@@ -50,15 +50,6 @@ namespace Senior_Project_Stock_Tracker
             public string IPOyear { get; set; }
             public string Sector { get; set; }
             public string industry { get; set; }
-
-            /*public NASDAQ_CSV_Data(string Symbol, string Name, string IPOyear, string Sector, string industry)
-            {
-                this.Symbol = Symbol;
-                this.Name = Name;
-                this.IPOyear = IPOyear;
-                this.Sector = Sector;
-                this.industry = industry;
-            }*/
         }
 
         protected class NYSE_CSV_Data
@@ -71,36 +62,111 @@ namespace Senior_Project_Stock_Tracker
             public string industry { get; set; }
         }
 
+        //Below is parsing the json string data
+
         //testing for json to Object --> load into chart
-        //fix
-        public class RootData
+        //need to create parsers for each time series and create a throw message for limit reach
+
+        public class RootIntraday//metadata works, fix time series
         {
-            [JsonProperty(PropertyName = "Meta Data")]
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
             public MetaData metaData { get; set; }
-            //[JsonProperty]
-            //public List<Time_Series> data { get; set; }
+            [JsonProperty("Time Series (1min)")]
+            public Dictionary<string, Time_Series_Normal> oneMin { get; set; }//key is date, then object contains the data
+            [JsonProperty("Time Series (5min)")]
+            public Dictionary<string, Time_Series_Normal> fiveMin { get; set; }
+            [JsonProperty("Time Series (15min)")]
+            public Dictionary<string, Time_Series_Normal> fifteenMin { get; set; }
+            [JsonProperty("Time Series (30min)")]
+            public Dictionary<string, Time_Series_Normal> thirtyMin { get; set; }
+            [JsonProperty("Time Series (60min)")]
+            public Dictionary<string, Time_Series_Normal> sixtyMin { get; set; }
         }
 
-        public class MetaData
+        public class RootDaily
         {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
+            [JsonProperty("Time Series (Daily)")]
+            public Dictionary<string, Time_Series_Normal> data { get; set; }
+        }
+
+        public class RootDailyAdj
+        {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
+            [JsonProperty("Time Series (Daily)")]
+            public Dictionary<string, Time_Series_Adjusted> data { get; set; }
+        }
+
+        public class RootWeekly
+        {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
+            [JsonProperty("Weekly Time Series")]
+            public Dictionary<string, Time_Series_Normal> data { get; set; }
+            [JsonProperty("Weekly Adjusted Time Series")]
+            public Dictionary<string, Time_Series_Adjusted> dataAdj { get; set; }
+        }
+
+        public class RootMonthly
+        {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
+            [JsonProperty("Monthly Time Series")]
+            public Dictionary<string, Time_Series_Normal> data { get; set; }
+            [JsonProperty("Monthly Adjusted Time Series")]
+            public Dictionary<string, Time_Series_Adjusted> dataAdj { get; set; }
+        }
+
+        public class MetaData//should be able to use this for all
+        {
+            [JsonProperty("1. Information", NullValueHandling = NullValueHandling.Ignore)]
             public string Information { get; set; }
+            [JsonProperty("2. Symbol", NullValueHandling = NullValueHandling.Ignore)]
             public string Symbol { get; set; }
-            [JsonProperty(PropertyName = "Last Refreshed")]
+            [JsonProperty("3. Last Refreshed", NullValueHandling = NullValueHandling.Ignore)]
             public string Last_Refreshed { get; set; }
+            [JsonProperty("4. Interval", NullValueHandling = NullValueHandling.Ignore)]
             public string Interval { get; set; }
-            [JsonProperty(PropertyName = "Output Size")]
+            [JsonProperty("5. Output Size", NullValueHandling = NullValueHandling.Ignore)]
             public string Output_Size { get; set; }
-            [JsonProperty(PropertyName = "Time Zone")]
+            [JsonProperty("6. Time Zone", NullValueHandling = NullValueHandling.Ignore)]
             public string Time_Zone { get; set; }
         }
 
-        public class Time_Series
+        public class Time_Series_Normal//intraday time series, daily, weekly, monthly
         {
-            public string open { get; set; }
-            public string high { get; set; }
-            public string low { get; set; }
-            public string close { get; set; }
-            public string volume { get; set; }
+            [JsonProperty("1. open", NullValueHandling = NullValueHandling.Ignore)]
+            public double open { get; set; }
+            [JsonProperty("2. high", NullValueHandling = NullValueHandling.Ignore)]
+            public double high { get; set; }
+            [JsonProperty("3. low", NullValueHandling = NullValueHandling.Ignore)]
+            public double low { get; set; }
+            [JsonProperty("4. close", NullValueHandling = NullValueHandling.Ignore)]
+            public double close { get; set; }
+            [JsonProperty("5. volume", NullValueHandling = NullValueHandling.Ignore)]
+            public double volume { get; set; }
+        }
+
+        public class Time_Series_Adjusted//daily adjusted, weekly adjusted, monthly adjusted
+        {
+            [JsonProperty("1. open", NullValueHandling = NullValueHandling.Ignore)]
+            public double open { get; set; }
+            [JsonProperty("2. high", NullValueHandling = NullValueHandling.Ignore)]
+            public double high { get; set; }
+            [JsonProperty("3. low", NullValueHandling = NullValueHandling.Ignore)]
+            public double low { get; set; }
+            [JsonProperty("4. close", NullValueHandling = NullValueHandling.Ignore)]
+            public double close { get; set; }
+            [JsonProperty("5. adjusted close", NullValueHandling = NullValueHandling.Ignore)]
+            public double adjusted_close { get; set; }
+            [JsonProperty("6. volume", NullValueHandling = NullValueHandling.Ignore)]
+            public double volume { get; set; }
+            [JsonProperty("7. dividend amount", NullValueHandling = NullValueHandling.Ignore)]
+            public double dividend_amount { get; set; }
+            [JsonProperty("8. split coefficient", NullValueHandling = NullValueHandling.Ignore)]
+            public double split_coefficient { get; set; }
         }
     }
 }

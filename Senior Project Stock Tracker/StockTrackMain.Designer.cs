@@ -129,16 +129,16 @@
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(585, 68);
+            this.richTextBox1.Location = new System.Drawing.Point(557, 63);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(472, 351);
+            this.richTextBox1.Size = new System.Drawing.Size(119, 50);
             this.richTextBox1.TabIndex = 2;
             this.richTextBox1.Text = "";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(860, 49);
+            this.label1.Location = new System.Drawing.Point(554, 35);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(136, 16);
             this.label1.TabIndex = 3;
@@ -193,9 +193,9 @@
             // 
             // cartesianChart1
             // 
-            this.cartesianChart1.Location = new System.Drawing.Point(1063, 96);
+            this.cartesianChart1.Location = new System.Drawing.Point(757, 105);
             this.cartesianChart1.Name = "cartesianChart1";
-            this.cartesianChart1.Size = new System.Drawing.Size(552, 407);
+            this.cartesianChart1.Size = new System.Drawing.Size(864, 536);
             this.cartesianChart1.TabIndex = 9;
             this.cartesianChart1.Text = "cartesianChart1";
             // 

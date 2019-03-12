@@ -1,15 +1,8 @@
-﻿using CsvHelper;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -36,6 +29,7 @@ namespace Senior_Project_Stock_Tracker
         {
             String urlStringTest = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
             //String urlStringTest = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=X0REJIV6R6ROZS3T";
+            //Console.WriteLine("URL: " + urlStringTest);
             var json = await httpClient.GetAsync(urlStringTest);
             return await json.Content.ReadAsStringAsync();
         }
@@ -105,8 +99,14 @@ namespace Senior_Project_Stock_Tracker
             public MetaData metaData { get; set; }
             [JsonProperty("Weekly Time Series")]
             public Dictionary<string, Time_Series_Normal> data { get; set; }
+        }
+
+        public class RootWeeklyAdj
+        {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
             [JsonProperty("Weekly Adjusted Time Series")]
-            public Dictionary<string, Time_Series_Adjusted> dataAdj { get; set; }
+            public Dictionary<string, Time_Series_Adjusted> data { get; set; }
         }
 
         public class RootMonthly
@@ -115,11 +115,17 @@ namespace Senior_Project_Stock_Tracker
             public MetaData metaData { get; set; }
             [JsonProperty("Monthly Time Series")]
             public Dictionary<string, Time_Series_Normal> data { get; set; }
-            [JsonProperty("Monthly Adjusted Time Series")]
-            public Dictionary<string, Time_Series_Adjusted> dataAdj { get; set; }
         }
 
-        public class MetaData//should be able to use this for all
+        public class RootMonthlyAdj
+        {
+            [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
+            public MetaData metaData { get; set; }
+            [JsonProperty("Monthly Adjusted Time Series")]
+            public Dictionary<string, Time_Series_Adjusted> data { get; set; }
+        }
+
+        public class MetaData//numbering is different for some, but should be fine
         {
             [JsonProperty("1. Information", NullValueHandling = NullValueHandling.Ignore)]
             public string Information { get; set; }

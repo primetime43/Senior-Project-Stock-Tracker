@@ -1,7 +1,4 @@
-﻿using NewsAPI;
-using NewsAPI.Constants;
-using NewsAPI.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -45,7 +42,7 @@ namespace Senior_Project_Stock_Tracker
             if (test1.articles.Count >= 10)
             {
                 numOfArticles = 10;
-                MessageBox.Show("Here");
+                //MessageBox.Show("Here");
             }
             else
                 numOfArticles = test1.articles.Count;

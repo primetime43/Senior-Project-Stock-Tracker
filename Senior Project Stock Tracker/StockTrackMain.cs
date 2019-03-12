@@ -1,15 +1,12 @@
 ﻿using CsvHelper;
 using LiveCharts;
 using LiveCharts.Wpf;
-using NewsAPI;
-using NewsAPI.Constants;
-using NewsAPI.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Windows;
+using System.Linq;
 
 //API Key: X0REJIV6R6ROZS3T
 //News API Key: 94b9e25568ca4ee3bef44fc4c7ae335e
@@ -25,6 +22,7 @@ namespace Senior_Project_Stock_Tracker
             loadNYSECompanies();
             timeSeriesComboBox.SelectedItem = "Intraday";
             timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
+            desiredDataComboBox.SelectedItem = "Open";
         }
 
         private List<string> marketSectors = new List<string>();
@@ -149,6 +147,10 @@ namespace Senior_Project_Stock_Tracker
         private static Boolean flag = true;
         private void companyListingslistBox_SelectedIndexChanged(object sender, EventArgs e)//load the companies into the listbox
         {
+            if (companyListingslistBox.SelectedIndex == -1)
+                button2.Enabled = false;
+            else
+                button2.Enabled = true;
             checkForMultipleSymbols();
         }
 
@@ -185,11 +187,40 @@ namespace Senior_Project_Stock_Tracker
             loadCompaniesIntoListBox();
         }
 
+        private static string desiredData;
+        private void desiredDataComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            desiredData = desiredDataComboBox.SelectedItem.ToString();
+        }
+
+        private void updateDataComboBox(string selectedTimeSeries)
+        {
+            switch (selectedTimeSeries)
+            {
+                //add additional options for adjusted time series
+                case "TIME_SERIES_DAILY_ADJUSTED":
+                case "TIME_SERIES_WEEKLY_ADJUSTED":
+                case "TIME_SERIES_MONTHLY_ADJUSTED":
+                    if (!desiredDataComboBox.Items.Contains("Adjusted Close"))
+                    {
+                        desiredDataComboBox.Items.Add("Adjusted Close");
+                        desiredDataComboBox.Items.Add("Dividend Amount");
+                        desiredDataComboBox.Items.Add("Split Coefficient");
+                    }
+                    break;
+                //remove them when adjusted time series isn't selected
+                default:
+                    desiredDataComboBox.Items.Remove("Adjusted Close");
+                    desiredDataComboBox.Items.Remove("Dividend Amount");
+                    desiredDataComboBox.Items.Remove("Split Coefficient");
+                    break;
+
+            }
+        }
+
         private string symbolJSONreturn = "";
         private void button2_Click(object sender, EventArgs e)//testing chart stuff
         {
-            //richTextBox1.Clear();
-            //richTextBox1.Text = symbolJSONreturn;
             cartesianChart1.Series.Clear();
             cartesianChart1.AxisX.Clear();
             cartesianChart1.AxisY.Clear();
@@ -212,17 +243,27 @@ namespace Senior_Project_Stock_Tracker
                     loadDailyToChart(dailyAdj);
                     break;
                 case "Weekly":
-                case "Weekly Adjusted":
                     RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
                     weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
+                    loadWeeklyToChart(weekly);
+                    break;
+                case "Weekly Adjusted":
+                    RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
+                    weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
+                    loadWeeklyToChart(weeklyAdj);
                     break;
                 case "Monthly":
-                case "Monthly Adjusted":
                     RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
                     monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
+                    loadMonthlyToChart(monthly);
+                    break;
+                case "Monthly Adjusted":
+                    RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
+                    monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
+                    loadMonthlyToChart(monthlyAdj);
                     break;
             }
-            Console.WriteLine("Here");
+            //Console.WriteLine("Here");
         }
 
         //disable the time series interval combobox because the interval only applies to intraday, and is non existant in other time series json strings
@@ -268,14 +309,15 @@ namespace Senior_Project_Stock_Tracker
                     timeSeriesFlag = "Monthly Adjusted";
                     break;
             }
-            if(selectedCompany != null)
+            updateDataComboBox(selectedTimeSeries);
+            if (selectedCompany != null)
                 checkForMultipleSymbols();
         }
 
         private void timeSeriesIntervalComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series intervals
         {
             selectedTimeSeriesInterval = timeSeriesIntervalComboBox.SelectedItem.ToString();
-            switch(selectedTimeSeriesInterval)
+            switch (selectedTimeSeriesInterval)
             {
                 case "1 Minute":
                     selectedTimeSeriesInterval = "1min";
@@ -299,143 +341,301 @@ namespace Senior_Project_Stock_Tracker
 
         private void loadIntradayToChart(RootIntraday data)
         {
-            double[] values = new double[100];
+            string[] keys = new string[data.oneMin.Keys.Count];
+            double[] values = new double[data.oneMin.Keys.Count];
             int counter = 0;
             if (data.oneMin != null)
             {
-                //change from open data. Not sure what data to use here for intraday
+                keys = data.oneMin.Keys.ToArray();
                 foreach (var key in data.oneMin.Keys)
                 {
-                    Console.WriteLine("Key: " + key + "\nOpen: " + data.oneMin[key].open);
-                    values[counter] = data.oneMin[key].open;
+                    if (desiredData == "Open")
+                        values[counter] = data.oneMin[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.oneMin[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.oneMin[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.oneMin[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.oneMin[key].volume;
                     counter++;
                 }
             }
             else if (data.fiveMin != null)
             {
+                keys = data.fiveMin.Keys.ToArray();
                 foreach (var key in data.fiveMin.Keys)
                 {
-                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.fiveMin[key].open);
+                    if (desiredData == "Open")
+                        values[counter] = data.fiveMin[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.fiveMin[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.fiveMin[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.fiveMin[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.fiveMin[key].volume;
+                    counter++;
                 }
             }
             else if (data.fifteenMin != null)
             {
+                keys = data.fifteenMin.Keys.ToArray();
                 foreach (var key in data.fifteenMin.Keys)
                 {
-                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.fifteenMin[key].open);
+                    if (desiredData == "Open")
+                        values[counter] = data.fifteenMin[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.fifteenMin[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.fifteenMin[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.fifteenMin[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.fifteenMin[key].volume;
+                    counter++;
                 }
             }
             else if (data.thirtyMin != null)
             {
+                keys = data.thirtyMin.Keys.ToArray();
                 foreach (var key in data.thirtyMin.Keys)
                 {
-                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.thirtyMin[key].open);
+                    if (desiredData == "Open")
+                        values[counter] = data.thirtyMin[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.thirtyMin[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.thirtyMin[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.thirtyMin[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.thirtyMin[key].volume;
+                    counter++;
                 }
             }
             else if (data.sixtyMin != null)
             {
+                keys = data.sixtyMin.Keys.ToArray();
                 foreach (var key in data.sixtyMin.Keys)
                 {
-                    //Console.WriteLine("Key: " + key + "\nOpen: " + data.sixtyMin[key].open);
+                    if (desiredData == "Open")
+                        values[counter] = data.sixtyMin[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.sixtyMin[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.sixtyMin[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.sixtyMin[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.sixtyMin[key].volume;
+                    counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            cartesianChart1.Series = new SeriesCollection
-            {
-                //lines and their values
-                new LineSeries
-                {
-                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
-                    Values = new ChartValues<double> (values)
-                }
-            };
-
-            //bottom x axis labels
-            cartesianChart1.AxisX.Add(new Axis
-            {
-                Title = "Time",
-                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
-            });
-
-            //left side y axis labels
-            cartesianChart1.AxisY.Add(new Axis
-            {
-                Title = "Values",
-                LabelFormatter = value => value.ToString("C")
-            });
-
-            //right side legend
-            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+            loadDataToChart(data.metaData.Symbol, values, keys);
         }
 
+        //normal daily data
         private void loadDailyToChart(RootDaily data)
         {
-            double[] values = new double[100];
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
             int counter = 0;
             if (data.data != null)
             {
                 foreach (var key in data.data.Keys)
                 {
-                    values[counter] = data.data[key].open;
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            cartesianChart1.Series = new SeriesCollection
-            {
-                //lines and their values
-                new LineSeries
-                {
-                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
-                    Values = new ChartValues<double> (values)
-                }
-            };
-
-            //bottom x axis labels
-            cartesianChart1.AxisX.Add(new Axis
-            {
-                Title = "Time",
-                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
-            });
-
-            //left side y axis labels
-            cartesianChart1.AxisY.Add(new Axis
-            {
-                Title = "Values",
-                LabelFormatter = value => value.ToString("C")
-            });
-
-            //right side legend
-            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+            loadDataToChart(data.metaData.Symbol, values, keys);
         }
-
+        //adjusted daily data
         private void loadDailyToChart(RootDailyAdj data)
         {
-            double[] values = new double[100];
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
             int counter = 0;
             if (data.data != null)
             {
                 foreach (var key in data.data.Keys)
                 {
-                    values[counter] = data.data[key].open;
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Adjusted Close")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Dividend Amount")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Split Coefficient")
+                        values[counter] = data.data[key].volume;
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
-            
-            //stuff below is for chart. Needs fixed/updated
 
+            loadDataToChart(data.metaData.Symbol, values, keys);
+        }
+        //normal weekly data
+        private void loadWeeklyToChart(RootWeekly data)
+        {
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            loadDataToChart(data.metaData.Symbol, values, keys);
+        }
+        //adjusted weekly data
+        private void loadWeeklyToChart(RootWeeklyAdj data)
+        {
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Adjusted Close")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Dividend Amount")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Split Coefficient")
+                        values[counter] = data.data[key].volume;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            loadDataToChart(data.metaData.Symbol, values, keys);
+        }
+        //normal monthly data
+        private void loadMonthlyToChart(RootMonthly data)
+        {
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            loadDataToChart(data.metaData.Symbol, values, keys);
+        }
+        //adjusted monthly data
+        private void loadMonthlyToChart(RootMonthlyAdj data)
+        {
+            string[] keys = data.data.Keys.ToArray();
+            double[] values = new double[data.data.Keys.Count];
+            int counter = 0;
+            if (data.data != null)
+            {
+                foreach (var key in data.data.Keys)
+                {
+                    if (desiredData == "Open")
+                        values[counter] = data.data[key].open;
+                    else if (desiredData == "Close")
+                        values[counter] = data.data[key].close;
+                    else if (desiredData == "High")
+                        values[counter] = data.data[key].high;
+                    else if (desiredData == "Low")
+                        values[counter] = data.data[key].low;
+                    else if (desiredData == "Volume")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Adjusted Close")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Dividend Amount")
+                        values[counter] = data.data[key].volume;
+                    else if (desiredData == "Split Coefficient")
+                        values[counter] = data.data[key].volume;
+                    counter++;
+                }
+            }
+            else
+                Console.WriteLine("Error, all are null. Testing...");
+
+            loadDataToChart(data.metaData.Symbol, values, keys);
+        }
+
+        private void loadDataToChart(string symbol, double[] values, string[] keys)
+        {
+            string[] test = { "a", "b" };
             cartesianChart1.Series = new SeriesCollection
             {
                 //lines and their values
                 new LineSeries
                 {
-                    Title = selectedCompany + " (" + data.metaData.Symbol + ")",
+                    Title = selectedCompany + " (" + symbol + ")",
                     Values = new ChartValues<double> (values)
                 }
             };
@@ -444,7 +644,7 @@ namespace Senior_Project_Stock_Tracker
             cartesianChart1.AxisX.Add(new Axis
             {
                 Title = "Time",
-                Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
+                Labels = keys
             });
 
             //left side y axis labels
@@ -455,7 +655,7 @@ namespace Senior_Project_Stock_Tracker
             });
 
             //right side legend
-            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+            cartesianChart1.LegendLocation = LegendLocation.Right;
         }
     }
 }

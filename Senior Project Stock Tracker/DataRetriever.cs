@@ -61,7 +61,7 @@ namespace Senior_Project_Stock_Tracker
         //testing for json to Object --> load into chart
         //need to create parsers for each time series and create a throw message for limit reach
 
-        public class RootIntraday//metadata works, fix time series
+        public class RootIntraday
         {
             [JsonProperty("Meta Data", NullValueHandling = NullValueHandling.Ignore)]
             public MetaData metaData { get; set; }

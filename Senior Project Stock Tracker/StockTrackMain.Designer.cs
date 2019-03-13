@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StockTrackMain));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,7 +38,7 @@
             this.robinhoodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.button1 = new System.Windows.Forms.Button();
+            this.companyNewsBtn = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -49,10 +51,25 @@
             this.timeSeriesComboBox = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.timeSeriesIntervalComboBox = new System.Windows.Forms.ComboBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.updateChartBtn = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.desiredDataComboBox = new System.Windows.Forms.ComboBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.SummaryQuoteLbl = new System.Windows.Forms.LinkLabel();
+            this.IndustryLbl = new System.Windows.Forms.Label();
+            this.IPOyearLbl = new System.Windows.Forms.Label();
+            this.symbolLbl = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.menuStrip1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -119,19 +136,19 @@
             this.sellToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
             this.sellToolStripMenuItem.Text = "Sell";
             // 
-            // button1
+            // companyNewsBtn
             // 
-            this.button1.Location = new System.Drawing.Point(37, 443);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(355, 104);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Show News";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.companyNewsBtn.Location = new System.Drawing.Point(178, 264);
+            this.companyNewsBtn.Name = "companyNewsBtn";
+            this.companyNewsBtn.Size = new System.Drawing.Size(147, 60);
+            this.companyNewsBtn.TabIndex = 1;
+            this.companyNewsBtn.Text = "Company News";
+            this.companyNewsBtn.UseVisualStyleBackColor = true;
+            this.companyNewsBtn.Click += new System.EventHandler(this.companyNewsBtn_Click);
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(557, 63);
+            this.richTextBox1.Location = new System.Drawing.Point(234, 637);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.Size = new System.Drawing.Size(119, 50);
             this.richTextBox1.TabIndex = 2;
@@ -140,7 +157,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(554, 35);
+            this.label1.Location = new System.Drawing.Point(231, 609);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(136, 16);
             this.label1.TabIndex = 3;
@@ -149,7 +166,7 @@
             // textBox1
             // 
             this.textBox1.Cursor = System.Windows.Forms.Cursors.SizeWE;
-            this.textBox1.Location = new System.Drawing.Point(401, 506);
+            this.textBox1.Location = new System.Drawing.Point(15, 657);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(176, 22);
             this.textBox1.TabIndex = 4;
@@ -157,7 +174,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(398, 487);
+            this.label2.Location = new System.Drawing.Point(12, 638);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(140, 16);
             this.label2.TabIndex = 5;
@@ -167,7 +184,7 @@
             // 
             this.sectorsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sectorsComboBox.FormattingEnabled = true;
-            this.sectorsComboBox.Location = new System.Drawing.Point(12, 54);
+            this.sectorsComboBox.Location = new System.Drawing.Point(6, 45);
             this.sectorsComboBox.MaxDropDownItems = 50;
             this.sectorsComboBox.Name = "sectorsComboBox";
             this.sectorsComboBox.Size = new System.Drawing.Size(198, 24);
@@ -177,34 +194,34 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 35);
+            this.label3.Location = new System.Drawing.Point(6, 26);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(50, 16);
+            this.label3.Size = new System.Drawing.Size(111, 16);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Sector:";
+            this.label3.Text = "Company Sector:";
             // 
             // companyListingslistBox
             // 
             this.companyListingslistBox.FormattingEnabled = true;
             this.companyListingslistBox.ItemHeight = 16;
-            this.companyListingslistBox.Location = new System.Drawing.Point(270, 35);
+            this.companyListingslistBox.Location = new System.Drawing.Point(223, 26);
             this.companyListingslistBox.Name = "companyListingslistBox";
-            this.companyListingslistBox.Size = new System.Drawing.Size(267, 276);
+            this.companyListingslistBox.Size = new System.Drawing.Size(267, 212);
             this.companyListingslistBox.TabIndex = 8;
             this.companyListingslistBox.SelectedIndexChanged += new System.EventHandler(this.companyListingslistBox_SelectedIndexChanged);
             // 
             // cartesianChart1
             // 
-            this.cartesianChart1.Location = new System.Drawing.Point(757, 105);
+            this.cartesianChart1.Location = new System.Drawing.Point(538, 28);
             this.cartesianChart1.Name = "cartesianChart1";
-            this.cartesianChart1.Size = new System.Drawing.Size(864, 536);
+            this.cartesianChart1.Size = new System.Drawing.Size(1097, 597);
             this.cartesianChart1.TabIndex = 9;
             this.cartesianChart1.Text = "cartesianChart1";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 114);
+            this.label4.Location = new System.Drawing.Point(6, 81);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(84, 16);
             this.label4.TabIndex = 10;
@@ -222,16 +239,17 @@
             "Weekly Adjusted",
             "Monthly",
             "Monthly Adjusted"});
-            this.timeSeriesComboBox.Location = new System.Drawing.Point(12, 133);
+            this.timeSeriesComboBox.Location = new System.Drawing.Point(6, 100);
             this.timeSeriesComboBox.Name = "timeSeriesComboBox";
             this.timeSeriesComboBox.Size = new System.Drawing.Size(198, 24);
             this.timeSeriesComboBox.TabIndex = 11;
+            this.toolTip1.SetToolTip(this.timeSeriesComboBox, resources.GetString("timeSeriesComboBox.ToolTip"));
             this.timeSeriesComboBox.SelectedIndexChanged += new System.EventHandler(this.timeSeriesComboBox_SelectedIndexChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 183);
+            this.label5.Location = new System.Drawing.Point(6, 138);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(130, 16);
             this.label5.TabIndex = 12;
@@ -247,31 +265,31 @@
             "15 Minutes",
             "30 Minutes",
             "60 Minutes"});
-            this.timeSeriesIntervalComboBox.Location = new System.Drawing.Point(12, 202);
+            this.timeSeriesIntervalComboBox.Location = new System.Drawing.Point(6, 157);
             this.timeSeriesIntervalComboBox.Name = "timeSeriesIntervalComboBox";
             this.timeSeriesIntervalComboBox.Size = new System.Drawing.Size(198, 24);
             this.timeSeriesIntervalComboBox.TabIndex = 13;
             this.timeSeriesIntervalComboBox.SelectedIndexChanged += new System.EventHandler(this.timeSeriesIntervalComboBox_SelectedIndexChanged);
             // 
-            // button2
+            // updateChartBtn
             // 
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(37, 564);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(355, 104);
-            this.button2.TabIndex = 14;
-            this.button2.Text = "Test Chart";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.updateChartBtn.Enabled = false;
+            this.updateChartBtn.Location = new System.Drawing.Point(9, 264);
+            this.updateChartBtn.Name = "updateChartBtn";
+            this.updateChartBtn.Size = new System.Drawing.Size(149, 60);
+            this.updateChartBtn.TabIndex = 14;
+            this.updateChartBtn.Text = "Update Chart";
+            this.updateChartBtn.UseVisualStyleBackColor = true;
+            this.updateChartBtn.Click += new System.EventHandler(this.updateChartBtn_Click);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 259);
+            this.label6.Location = new System.Drawing.Point(6, 193);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(40, 16);
+            this.label6.Size = new System.Drawing.Size(160, 16);
             this.label6.TabIndex = 15;
-            this.label6.Text = "Data:";
+            this.label6.Text = "Price Measurement Point:";
             // 
             // desiredDataComboBox
             // 
@@ -283,33 +301,160 @@
             "High",
             "Low",
             "Volume"});
-            this.desiredDataComboBox.Location = new System.Drawing.Point(12, 278);
+            this.desiredDataComboBox.Location = new System.Drawing.Point(6, 212);
             this.desiredDataComboBox.Name = "desiredDataComboBox";
             this.desiredDataComboBox.Size = new System.Drawing.Size(198, 24);
             this.desiredDataComboBox.TabIndex = 16;
             this.desiredDataComboBox.SelectedIndexChanged += new System.EventHandler(this.desiredDataComboBox_SelectedIndexChanged);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.button3);
+            this.groupBox1.Controls.Add(this.desiredDataComboBox);
+            this.groupBox1.Controls.Add(this.updateChartBtn);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Controls.Add(this.timeSeriesIntervalComboBox);
+            this.groupBox1.Controls.Add(this.companyListingslistBox);
+            this.groupBox1.Controls.Add(this.label5);
+            this.groupBox1.Controls.Add(this.timeSeriesComboBox);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.companyNewsBtn);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.sectorsComboBox);
+            this.groupBox1.Location = new System.Drawing.Point(11, 28);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(507, 343);
+            this.groupBox1.TabIndex = 17;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Parameters";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(343, 264);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(147, 60);
+            this.button3.TabIndex = 17;
+            this.button3.Text = "temp";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label10);
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.SummaryQuoteLbl);
+            this.groupBox2.Controls.Add(this.IndustryLbl);
+            this.groupBox2.Controls.Add(this.IPOyearLbl);
+            this.groupBox2.Controls.Add(this.symbolLbl);
+            this.groupBox2.Location = new System.Drawing.Point(11, 377);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(507, 92);
+            this.groupBox2.TabIndex = 18;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Additional Stock Info";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(6, 67);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(107, 16);
+            this.label10.TabIndex = 7;
+            this.label10.Text = "Summary Quote:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 51);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(57, 16);
+            this.label9.TabIndex = 6;
+            this.label9.Text = "Industry:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 34);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(65, 16);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "IPO Year:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 18);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(57, 16);
+            this.label7.TabIndex = 4;
+            this.label7.Text = "Symbol:";
+            // 
+            // SummaryQuoteLbl
+            // 
+            this.SummaryQuoteLbl.AutoSize = true;
+            this.SummaryQuoteLbl.Location = new System.Drawing.Point(119, 66);
+            this.SummaryQuoteLbl.Name = "SummaryQuoteLbl";
+            this.SummaryQuoteLbl.Size = new System.Drawing.Size(119, 16);
+            this.SummaryQuoteLbl.TabIndex = 3;
+            this.SummaryQuoteLbl.TabStop = true;
+            this.SummaryQuoteLbl.Text = "SummaryQuoteLbl";
+            this.SummaryQuoteLbl.Visible = false;
+            this.SummaryQuoteLbl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.SummaryQuoteLbl_LinkClicked);
+            // 
+            // IndustryLbl
+            // 
+            this.IndustryLbl.AutoSize = true;
+            this.IndustryLbl.Location = new System.Drawing.Point(64, 50);
+            this.IndustryLbl.Name = "IndustryLbl";
+            this.IndustryLbl.Size = new System.Drawing.Size(72, 16);
+            this.IndustryLbl.TabIndex = 2;
+            this.IndustryLbl.Text = "industryLbl";
+            this.IndustryLbl.Visible = false;
+            // 
+            // IPOyearLbl
+            // 
+            this.IPOyearLbl.AutoSize = true;
+            this.IPOyearLbl.Location = new System.Drawing.Point(71, 34);
+            this.IPOyearLbl.Name = "IPOyearLbl";
+            this.IPOyearLbl.Size = new System.Drawing.Size(75, 16);
+            this.IPOyearLbl.TabIndex = 1;
+            this.IPOyearLbl.Text = "IPOyearLbl";
+            this.IPOyearLbl.Visible = false;
+            // 
+            // symbolLbl
+            // 
+            this.symbolLbl.AutoSize = true;
+            this.symbolLbl.Location = new System.Drawing.Point(69, 18);
+            this.symbolLbl.Name = "symbolLbl";
+            this.symbolLbl.Size = new System.Drawing.Size(70, 16);
+            this.symbolLbl.TabIndex = 0;
+            this.symbolLbl.Text = "symbolLbl";
+            this.symbolLbl.Visible = false;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Location = new System.Drawing.Point(11, 475);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(506, 116);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Compare Stocks";
             // 
             // StockTrackMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1647, 703);
-            this.Controls.Add(this.desiredDataComboBox);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.timeSeriesIntervalComboBox);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.timeSeriesComboBox);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.cartesianChart1);
-            this.Controls.Add(this.companyListingslistBox);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.sectorsComboBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MainMenuStrip = this.menuStrip1;
@@ -318,6 +463,10 @@
             this.Text = "Stock Market Tracker";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -333,7 +482,7 @@
         private System.Windows.Forms.ToolStripMenuItem robinhoodToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem buyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sellToolStripMenuItem;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button companyNewsBtn;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -346,9 +495,22 @@
         private System.Windows.Forms.ComboBox timeSeriesComboBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox timeSeriesIntervalComboBox;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button updateChartBtn;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox desiredDataComboBox;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.LinkLabel SummaryQuoteLbl;
+        private System.Windows.Forms.Label IndustryLbl;
+        private System.Windows.Forms.Label IPOyearLbl;
+        private System.Windows.Forms.Label symbolLbl;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }
 

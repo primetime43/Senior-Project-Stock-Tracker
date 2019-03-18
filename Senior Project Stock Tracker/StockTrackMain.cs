@@ -713,3 +713,11 @@ namespace Senior_Project_Stock_Tracker
         }
     }
 }
+/*
+ * TODO:
+ * add ability to compare stocks on chart
+ * fix chart to show volume with correct axis labels etc
+ * add option to track stocks
+ * maybe add option to show different types of charts
+ * ability to search for stocks, maybe with prediction like google search
+ * */

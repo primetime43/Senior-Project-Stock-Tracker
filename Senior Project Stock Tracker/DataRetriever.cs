@@ -29,7 +29,7 @@ namespace Senior_Project_Stock_Tracker
         {
             String urlStringTest = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
             //String urlStringTest = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=X0REJIV6R6ROZS3T";
-            //Console.WriteLine("URL: " + urlStringTest);
+            Console.WriteLine("URL: " + urlStringTest);
             var json = await httpClient.GetAsync(urlStringTest);
             return await json.Content.ReadAsStringAsync();
         }

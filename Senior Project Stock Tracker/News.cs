@@ -15,7 +15,6 @@ namespace Senior_Project_Stock_Tracker
         private string selectedCompany = "";
         public News(string company)
         {
-            InitializeComponent();
             selectedCompany = company;
             InitializeComponent();
             if (selectedCompany != null)
@@ -25,6 +24,7 @@ namespace Senior_Project_Stock_Tracker
                 selectedCompany = "NASDAQ";
                 PopulateListView();
             }
+            PopulateListView();
         }
 
         RootObject test1 = null;
@@ -38,7 +38,7 @@ namespace Senior_Project_Stock_Tracker
 
             test1 = JsonConvert.DeserializeObject<RootObject>(jsonAsString);
             ImageList images = new ImageList();
-            Console.WriteLine("Size: " + test1.articles.Count);
+            //Console.WriteLine("Size: " + test1.articles.Count);
             int numOfArticles = 0;
             if (test1.articles.Count >= 10)
             {
@@ -48,18 +48,18 @@ namespace Senior_Project_Stock_Tracker
             else
                 numOfArticles = test1.articles.Count;
 
-            Console.WriteLine("Num set to: " + numOfArticles);
+            //Console.WriteLine("Num set to: " + numOfArticles);
             int articleIndex = 0;
             for (int i = 0; i < numOfArticles; i++)
             {
                 if (test1.articles[i].urlToImage != null)
                 {
-                    listView1.Items.Add(test1.articles[i].title, articleIndex);
+                    newsDisplayListView.Items.Add(test1.articles[i].title, articleIndex);
                     images.Images.Add(LoadImage(test1.articles[i].urlToImage));
                     images.ImageSize = new Size(220, 165);
-                    listView1.LargeImageList = images;
+                    newsDisplayListView.LargeImageList = images;
                     articleIndex++;
-                    Console.WriteLine(articleIndex.ToString());
+                    //Console.WriteLine(articleIndex.ToString());
                 }
             }
         }
@@ -86,8 +86,8 @@ namespace Senior_Project_Stock_Tracker
                 //Console.WriteLine("Selected Item: " + listView1.SelectedItems[0].Text);
                 try
                 {
-                    Console.WriteLine("Test: " + listView1.SelectedIndices[0]);
-                    if (test1.articles[i].title == listView1.SelectedItems[0].Text)
+                    //Console.WriteLine("Test: " + newsDisplayListView.SelectedIndices[0]);
+                    if (test1.articles[i].title == newsDisplayListView.SelectedItems[0].Text)
                     {
                         //MessageBox.Show("Here 3");
                         webBrowser1.Navigate(new Uri(test1.articles[i].url));

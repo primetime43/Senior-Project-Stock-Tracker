@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.newsDisplayListView = new System.Windows.Forms.ListView();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
@@ -41,15 +41,15 @@
             this.webBrowser1.Size = new System.Drawing.Size(962, 786);
             this.webBrowser1.TabIndex = 2;
             // 
-            // listView1
+            // newsDisplayListView
             // 
-            this.listView1.Activation = System.Windows.Forms.ItemActivation.OneClick;
-            this.listView1.Location = new System.Drawing.Point(993, 12);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(634, 618);
-            this.listView1.TabIndex = 1;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.newsDisplayListView.Activation = System.Windows.Forms.ItemActivation.OneClick;
+            this.newsDisplayListView.Location = new System.Drawing.Point(993, 12);
+            this.newsDisplayListView.Name = "newsDisplayListView";
+            this.newsDisplayListView.Size = new System.Drawing.Size(634, 618);
+            this.newsDisplayListView.TabIndex = 1;
+            this.newsDisplayListView.UseCompatibleStateImageBehavior = false;
+            this.newsDisplayListView.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             // 
             // richTextBox1
             // 
@@ -65,7 +65,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1639, 828);
             this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.listView1);
+            this.Controls.Add(this.newsDisplayListView);
             this.Controls.Add(this.webBrowser1);
             this.Name = "News";
             this.Text = "News";
@@ -74,7 +74,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView newsDisplayListView;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.WebBrowser webBrowser1;
     }

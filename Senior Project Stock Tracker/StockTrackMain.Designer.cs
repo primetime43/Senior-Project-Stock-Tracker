@@ -278,7 +278,7 @@
             this.updateChartBtn.Name = "updateChartBtn";
             this.updateChartBtn.Size = new System.Drawing.Size(149, 60);
             this.updateChartBtn.TabIndex = 14;
-            this.updateChartBtn.Text = "Update Chart";
+            this.updateChartBtn.Text = "Display Chart";
             this.updateChartBtn.UseVisualStyleBackColor = true;
             this.updateChartBtn.Click += new System.EventHandler(this.updateChartBtn_Click);
             // 

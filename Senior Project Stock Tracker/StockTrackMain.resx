@@ -129,4 +129,12 @@ Daily - Cumulative prices and volume information for the day
 Weekly - Cumulative prices and volume information for the week
 Monthly - cumulative prices and volume information for the month</value>
   </data>
+  <data name="desiredDataComboBox.ToolTip" xml:space="preserve">
+    <value>Open - stock price at start time frame interval
+Close - stock price at end of time frame interval
+High - highest stock price during time frame interval
+Low - lowest stock price during time frame interval
+Volume - total amount of volume purcahsed during time frame interval
+</value>
+  </data>
 </root>

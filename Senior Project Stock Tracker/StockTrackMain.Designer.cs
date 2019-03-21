@@ -34,10 +34,6 @@
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fakeStockTrainerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.linkBrokerAccountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.robinhoodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.companyNewsBtn = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -66,10 +62,13 @@
             this.IPOyearLbl = new System.Windows.Forms.Label();
             this.symbolLbl = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -87,8 +86,7 @@
             // 
             this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.testToolStripMenuItem1,
-            this.fakeStockTrainerToolStripMenuItem,
-            this.linkBrokerAccountToolStripMenuItem});
+            this.fakeStockTrainerToolStripMenuItem});
             this.testToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
             this.testToolStripMenuItem.Size = new System.Drawing.Size(55, 21);
@@ -106,35 +104,6 @@
             this.fakeStockTrainerToolStripMenuItem.Name = "fakeStockTrainerToolStripMenuItem";
             this.fakeStockTrainerToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.fakeStockTrainerToolStripMenuItem.Text = "Fake Stock Trainer";
-            // 
-            // linkBrokerAccountToolStripMenuItem
-            // 
-            this.linkBrokerAccountToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.robinhoodToolStripMenuItem});
-            this.linkBrokerAccountToolStripMenuItem.Name = "linkBrokerAccountToolStripMenuItem";
-            this.linkBrokerAccountToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.linkBrokerAccountToolStripMenuItem.Text = "Broker Account";
-            // 
-            // robinhoodToolStripMenuItem
-            // 
-            this.robinhoodToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.buyToolStripMenuItem,
-            this.sellToolStripMenuItem});
-            this.robinhoodToolStripMenuItem.Name = "robinhoodToolStripMenuItem";
-            this.robinhoodToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
-            this.robinhoodToolStripMenuItem.Text = "Robinhood";
-            // 
-            // buyToolStripMenuItem
-            // 
-            this.buyToolStripMenuItem.Name = "buyToolStripMenuItem";
-            this.buyToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
-            this.buyToolStripMenuItem.Text = "Buy";
-            // 
-            // sellToolStripMenuItem
-            // 
-            this.sellToolStripMenuItem.Name = "sellToolStripMenuItem";
-            this.sellToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
-            this.sellToolStripMenuItem.Text = "Sell";
             // 
             // companyNewsBtn
             // 
@@ -207,6 +176,7 @@
             this.companyListingslistBox.Location = new System.Drawing.Point(223, 26);
             this.companyListingslistBox.Name = "companyListingslistBox";
             this.companyListingslistBox.Size = new System.Drawing.Size(267, 212);
+            this.companyListingslistBox.Sorted = true;
             this.companyListingslistBox.TabIndex = 8;
             this.companyListingslistBox.SelectedIndexChanged += new System.EventHandler(this.companyListingslistBox_SelectedIndexChanged);
             // 
@@ -217,6 +187,7 @@
             this.cartesianChart1.Size = new System.Drawing.Size(1097, 597);
             this.cartesianChart1.TabIndex = 9;
             this.cartesianChart1.Text = "cartesianChart1";
+            this.cartesianChart1.Visible = false;
             // 
             // label4
             // 
@@ -305,6 +276,7 @@
             this.desiredDataComboBox.Name = "desiredDataComboBox";
             this.desiredDataComboBox.Size = new System.Drawing.Size(198, 24);
             this.desiredDataComboBox.TabIndex = 16;
+            this.toolTip1.SetToolTip(this.desiredDataComboBox, resources.GetString("desiredDataComboBox.ToolTip"));
             this.desiredDataComboBox.SelectedIndexChanged += new System.EventHandler(this.desiredDataComboBox_SelectedIndexChanged);
             // 
             // groupBox1
@@ -433,11 +405,38 @@
             this.symbolLbl.Text = "symbolLbl";
             this.symbolLbl.Visible = false;
             // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Enabled = false;
+            this.checkBox2.Location = new System.Drawing.Point(18, 47);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(95, 20);
+            this.checkBox2.TabIndex = 4;
+            this.checkBox2.Text = "Company 2";
+            this.toolTip1.SetToolTip(this.checkBox2, "Check the box to lock the company name you wish to compare");
+            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(18, 21);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(95, 20);
+            this.checkBox1.TabIndex = 3;
+            this.checkBox1.Text = "Company 1";
+            this.toolTip1.SetToolTip(this.checkBox1, "Check the box to lock the company name you wish to compare");
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.checkBox2);
+            this.groupBox3.Controls.Add(this.checkBox1);
             this.groupBox3.Location = new System.Drawing.Point(11, 475);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(506, 116);
+            this.groupBox3.Size = new System.Drawing.Size(258, 74);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Compare Stocks";
@@ -467,6 +466,8 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -478,10 +479,6 @@
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem fakeStockTrainerToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem linkBrokerAccountToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem robinhoodToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem buyToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sellToolStripMenuItem;
         private System.Windows.Forms.Button companyNewsBtn;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Label label1;
@@ -511,6 +508,8 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 

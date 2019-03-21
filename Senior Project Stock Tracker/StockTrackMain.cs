@@ -1,10 +1,8 @@
-﻿using CsvHelper;
-using LiveCharts;
+﻿using LiveCharts;
 using LiveCharts.Wpf;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Windows;
 using System.Linq;
 using System.Net;
@@ -24,104 +22,17 @@ namespace Senior_Project_Stock_Tracker
             InitializeComponent();
             loadNASDAQCompanies();
             loadNYSECompanies();
+            loadSectors();
             timeSeriesComboBox.SelectedItem = "Intraday";
             timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
             desiredDataComboBox.SelectedItem = "Open";
+            sectorsComboBox.SelectedIndex = 0;
         }
 
-        private List<string> marketSectors = new List<string>();
-
-        public class companyInfo
+        public void loadSectors()
         {
-            public string Symbol { get; set; }
-            public string Name { get; set; }
-            public string IPOyear { get; set; }
-            public string Sector { get; set; }
-            public string industry { get; set; }
-        }
-
-        //NASDAQ
-        private Dictionary<string, companyInfo> NASDAQ_CompanyData = new Dictionary<string, companyInfo>();//key is symbol
-        private Dictionary<string, List<string>> mapSymbolToSector = new Dictionary<string, List<string>>();//contains array of sectors, each key is a sector and values are the company names in the sector
-        private Dictionary<string, List<string>> mapNameToSymbol = new Dictionary<string, List<string>>();//key is company names, and value is company's symbol (may have more than one symbol)
-        private void loadNASDAQCompanies()//load the NASDAQ companies from the csv file
-        {
-            IEnumerable<companyInfo> records;
-            using (var reader = new StreamReader("NASDAQcompanylist.csv"))
-            using (var csv = new CsvReader(reader))
-            {
-                records = csv.GetRecords<companyInfo>();//contains each row of data from csv
-
-                foreach (companyInfo record in records)
-                {
-                    //store list of sectors for nasdaq without duplicates in arraylist
-                    if (!marketSectors.Contains(record.Sector))
-                        marketSectors.Add(record.Sector);
-
-                    //create the objects for each Company (row) and store them in the NASDAQ_DATA dictionary as values, using their symbol's as the keys
-                    //symbol, object containing data
-                    //NASDAQ_Data.Add(record.Symbol, new NASDAQ_CSV_Data(/*record.Symbol, record.Name, record.IPOyear, record.Sector, record.industry*/));
-                    NASDAQ_CompanyData.Add(record.Symbol, record);
-
-
-                    //stuff for mapping companies to symbols (solves problem for when a company has multiple symbols)
-                    if (mapNameToSymbol.ContainsKey(record.Name))//contains the company name (key), so add symbol to list
-                    {
-                        List<string> list = mapNameToSymbol[record.Name];//find sector and add the company to the list according to appropriate sector
-                        list.Add(record.Symbol);
-                    }
-                    else//add the new company name and a new list to go with it storing symbols (only hits here the first time a new company is found)
-                    {
-                        var list = new List<string>() { record.Symbol };
-                        mapNameToSymbol.Add(record.Name, list);
-                    }
-
-                    //stuff for sectors and loading companies in combobox
-                    if (mapSymbolToSector.ContainsKey(record.Sector))//contains the key, so just update the list to the appropriate key
-                    {
-                        List<string> list = mapSymbolToSector[record.Sector];//find sector and add the company to the list according to appropriate sector
-                        list.Add(record.Name);
-                    }
-                    else//add the new sector and a new list to go with the sector (only hits here the first time a new sector is found)
-                    {
-                        //stuff for adding sectors and list the companies in the combobox
-                        var list = new List<string>() { record.Name };
-                        mapSymbolToSector.Add(record.Sector, list);
-                    }
-                }
-            }
-
-            //load sectors into the combobox (NYSE and NASDAQ have the same sectors)
             foreach (string sector in marketSectors)
                 sectorsComboBox.Items.Add(sector);
-        }
-
-        //add, fix and update. Change code below eventually...
-        //NYSE
-        //symbol, name
-        private Dictionary<string, string> NYSE_Name = new Dictionary<string, string>();
-        //symbol, ipoyear
-        private Dictionary<string, string> NYSE_IPOyear = new Dictionary<string, string>();
-        //symbol, sector
-        private Dictionary<string, string> NYSE_Sector = new Dictionary<string, string>();
-        //symbolr, industry
-        private Dictionary<string, string> NYSE_Industry = new Dictionary<string, string>();
-        private void loadNYSECompanies()//load the NYSE companies from the csv file
-        {
-            IEnumerable<NYSE_CSV_Data> records;
-            using (var reader = new StreamReader("NYSEcompanylist.csv"))
-            using (var csv = new CsvReader(reader))
-            {
-                records = csv.GetRecords<NYSE_CSV_Data>();
-
-                foreach (NYSE_CSV_Data record in records)
-                {
-                    NYSE_Name.Add(record.Symbol, record.Name);
-                    NYSE_IPOyear.Add(record.Symbol, record.IPOyear);
-                    NYSE_Sector.Add(record.Symbol, record.Sector);
-                    NYSE_Industry.Add(record.Symbol, record.industry);
-                }
-            }
         }
 
         private void companyNewsBtn_Click(object sender, EventArgs e)//open and display News form
@@ -139,23 +50,6 @@ namespace Senior_Project_Stock_Tracker
             this.Show();
         }
 
-        private async void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
-        {
-            if (mapNameToSymbol[selectedCompanyName].Count > 1)//selected company has more than one symbol
-            {
-                companyListingslistBox.Items.Clear();//clear the companies listbox to load the symbols
-                foreach (var listMember in mapNameToSymbol[selectedCompanyName])//mapped symbol to sector because symbols are unique values and some companies have multiple symbols in different sectors
-                {
-                    companyListingslistBox.Items.Add(listMember);//load symbols into the listbox
-                    flag = false;//set flag to false to 
-                }
-            }
-            else//one symbol, search mapNameToSymbol to find symbol for company name
-                //richTextBox1.Text = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
-                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
-            test();
-        }
-
         private static Boolean flag = true;
         private void companyListingslistBox_SelectedIndexChanged(object sender, EventArgs e)//load the companies into the listbox
         {
@@ -170,7 +64,6 @@ namespace Senior_Project_Stock_Tracker
         private async void checkForMultipleSymbols()
         {
             selectedCompany = companyListingslistBox.GetItemText(companyListingslistBox.SelectedItem);
-            richTextBox1.Clear();
             if (flag)//load the companies names into listbox
             {
                 processSelectedCompany(selectedCompany);
@@ -180,24 +73,42 @@ namespace Senior_Project_Stock_Tracker
                 symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, selectedCompany, selectedTimeSeriesInterval);
                 flag = true;
                 loadCompaniesIntoListBox();//load companies back into the listbox after user selects desired symbol
-                test(selectedCompany);
+                displayAdditionalInfo(selectedCompany);
             }
+
+            setComparedStocks();
         }
 
-        private void test(string symbol = null)
+        private async void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
+        {
+            if (mapNameToSymbol[selectedCompanyName].Count > 1)//selected company has more than one symbol
+            {
+                companyListingslistBox.Items.Clear();//clear the companies listbox to load the symbols
+                foreach (var listMember in mapNameToSymbol[selectedCompanyName])//mapped symbol to sector because symbols are unique values and some companies have multiple symbols in different sectors
+                {
+                    companyListingslistBox.Items.Add(listMember);//load symbols into the listbox
+                    flag = false;//set flag to false to 
+                }
+            }
+            else//one symbol, search mapNameToSymbol to find symbol for company name
+                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
+            displayAdditionalInfo();
+        }
+
+        private void displayAdditionalInfo(string symbol = null)
         {
             if (symbol == null)//one company symbol route
             {
-                IndustryLbl.Text = NASDAQ_CompanyData[mapNameToSymbol[selectedCompany][0]].industry;
-                symbolLbl.Text = NASDAQ_CompanyData[mapNameToSymbol[selectedCompany][0]].Symbol;
-                IPOyearLbl.Text = NASDAQ_CompanyData[mapNameToSymbol[selectedCompany][0]].IPOyear;
+                IndustryLbl.Text = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].industry;
+                symbolLbl.Text = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].Symbol;
+                IPOyearLbl.Text = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].IPOyear;
             }
             else//two symbol route
             {
-                IndustryLbl.Text = NASDAQ_CompanyData[symbol].industry;
-                symbolLbl.Text = NASDAQ_CompanyData[symbol].Symbol;
-                IPOyearLbl.Text = NASDAQ_CompanyData[symbol].IPOyear;
-                selectedCompany = NASDAQ_CompanyData[symbol].Name;
+                IndustryLbl.Text = stockMarketCompanies[symbol].industry;
+                symbolLbl.Text = stockMarketCompanies[symbol].Symbol;
+                IPOyearLbl.Text = stockMarketCompanies[symbol].IPOyear;
+                selectedCompany = stockMarketCompanies[symbol].Name;
             }
             groupBox2.Text = selectedCompany + " Stock Info";
             SummaryQuoteLbl.Text = "https://www.nasdaq.com/symbol/" + symbolLbl.Text;
@@ -207,7 +118,7 @@ namespace Senior_Project_Stock_Tracker
             SummaryQuoteLbl.Visible = true;
         }
 
-        private void loadCompaniesIntoListBox()
+        private void loadCompaniesIntoListBox()//populate the listbox containing the company names
         {
             companyListingslistBox.Items.Clear();//clear the box after selecting a different sector from combobox
             List<string> listValues = mapSymbolToSector[selectedSector];
@@ -230,6 +141,121 @@ namespace Senior_Project_Stock_Tracker
         {
             desiredData = desiredDataComboBox.SelectedItem.ToString();
         }
+
+        //methods for comparing stocks that work together start here to....
+        private void setComparedStocks()
+        {
+            //testing
+            if (!checkBox1.Checked)//not checked, keep changing company name
+                checkBox1.Text = selectedCompany;
+            else if (!checkBox2.Checked)
+            {
+                checkBox2.Text = selectedCompany;
+                checkBox2.Enabled = true;
+            }
+        }
+
+        public class CompareStocksObj
+        {
+            public string symbol { get; set; }
+            public double[] values { get; set; }
+            public string[] keys { get; set; }
+        }
+
+        private Boolean isComparing = false;
+        public Dictionary<int, CompareStocksObj> testingComp = new Dictionary<int, CompareStocksObj>();//key is symbol 
+        private async void compareStocks()//testing
+        {
+            isComparing = true;
+            int numOfStocksToCompare = 0;
+            if (checkBox1.Checked)
+                numOfStocksToCompare++;
+            if (checkBox2.Checked)
+                numOfStocksToCompare++;
+
+            string[] stockTest = new string[numOfStocksToCompare];
+
+            for (int i = 0; i < numOfStocksToCompare; i++)
+            {
+                if (i == 0)
+                    stockTest[i] = checkBox1.Text;
+                if (i == 1)
+                    stockTest[i] = checkBox2.Text;
+            }
+
+            for (int k = 0; k < stockTest.Length; k++)
+            {
+                //MessageBox.Show(stockTest[k] + ": " + mapNameToSymbol[stockTest[k]][0]);
+                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[stockTest[k]][0], selectedTimeSeriesInterval);
+
+                ExceededReq notify = new ExceededReq();
+                notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
+                if (notify.Note != null)//temp for testing
+                {
+                    MessageBox.Show(notify.Note.ToString());
+                    return;
+                }
+                else
+                {
+                    switch (timeSeriesFlag)
+                    {
+                        case "Intraday":
+                            RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
+                            intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
+                            loadIntradayToChart(intraday);
+                            break;
+                        case "Daily":
+                            RootDaily daily = new RootDaily();//contains the daily & daily adj objs
+                            daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
+                            loadDailyToChart(daily);
+                            break;
+                        case "Daily Adjusted":
+                            RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
+                            dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
+                            loadDailyToChart(dailyAdj);
+                            break;
+                        case "Weekly":
+                            RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
+                            weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
+                            loadWeeklyToChart(weekly);
+                            break;
+                        case "Weekly Adjusted":
+                            RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
+                            weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
+                            loadWeeklyToChart(weeklyAdj);
+                            break;
+                        case "Monthly":
+                            RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
+                            monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
+                            loadMonthlyToChart(monthly);
+                            break;
+                        case "Monthly Adjusted":
+                            RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
+                            monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
+                            loadMonthlyToChart(monthlyAdj);
+                            break;
+                    }
+                }
+                symbolJSONreturn = null;
+            }
+            loadDataToChartComparing();
+            comparingIndex = 0;
+            isComparing = false;
+            testingComp.Clear();
+        }
+
+        private static int comparingIndex = 0;
+        private void storeComparingStockData(string symbol, double[] values, string[] keys)//testStore(data.metaData.Symbol, values, keys)
+        {
+            CompareStocksObj comp1 = new CompareStocksObj();
+            comp1.symbol = symbol;
+            comp1.values = values;
+            comp1.keys = keys;
+            testingComp.Add(comparingIndex, comp1);
+            comparingIndex++;
+        }
+
+        //....ends here here
 
         private void updateDataComboBox(string selectedTimeSeries)
         {
@@ -257,7 +283,6 @@ namespace Senior_Project_Stock_Tracker
         }
 
         //disable the time series interval combobox because the interval only applies to intraday, and is non existant in other time series json strings
-
         private void timeSeriesComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series
         {
             selectedTimeSeries = timeSeriesComboBox.SelectedItem.ToString();
@@ -333,56 +358,79 @@ namespace Senior_Project_Stock_Tracker
         private string symbolJSONreturn = "";
         private void updateChartBtn_Click(object sender, EventArgs e)
         {
+            if ((!checkBox1.Checked && checkBox2.Checked) || (checkBox1.Checked && !checkBox2.Checked))//if one checkbox is checked, notify user
+            {
+                MessageBox.Show("Both check boxes must be checked to compare companies");
+                return;
+            }
+
             cartesianChart1.Series.Clear();
             cartesianChart1.AxisX.Clear();
             cartesianChart1.AxisY.Clear();
+            cartesianChart1.Visible = true;
 
-            switch (timeSeriesFlag)
+            if (checkBox1.Checked && checkBox2.Checked)//both are checked, user wants to compare the two stocks
+                compareStocks();
+            else//no comparing, just load the single stock on the graph
             {
-                case "Intraday":
-                    RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
-                    intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
-                    loadIntradayToChart(intraday);
-                    break;
-                case "Daily":
-                    RootDaily daily = new RootDaily();//contains the daily & daily adj objs
-                    daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
-                    loadDailyToChart(daily);
-                    break;
-                case "Daily Adjusted":
-                    RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
-                    dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
-                    loadDailyToChart(dailyAdj);
-                    break;
-                case "Weekly":
-                    RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
-                    weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
-                    loadWeeklyToChart(weekly);
-                    break;
-                case "Weekly Adjusted":
-                    RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
-                    weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
-                    loadWeeklyToChart(weeklyAdj);
-                    break;
-                case "Monthly":
-                    RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
-                    monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
-                    loadMonthlyToChart(monthly);
-                    break;
-                case "Monthly Adjusted":
-                    RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
-                    monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
-                    loadMonthlyToChart(monthlyAdj);
-                    break;
+                ExceededReq notify = new ExceededReq();
+                notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
+                if (notify.Note != null)//for when the api notifies user must wait to make more request due to free api restrictions
+                {
+                    MessageBox.Show(notify.Note.ToString());
+                    return;
+                }
+                else
+                {
+
+                    switch (timeSeriesFlag)
+                    {
+                        case "Intraday":
+                            RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
+                            intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
+                            loadIntradayToChart(intraday);
+                            break;
+                        case "Daily":
+                            RootDaily daily = new RootDaily();//contains the daily & daily adj objs
+                            daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
+                            loadDailyToChart(daily);
+                            break;
+                        case "Daily Adjusted":
+                            RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
+                            dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
+                            loadDailyToChart(dailyAdj);
+                            break;
+                        case "Weekly":
+                            RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
+                            weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
+                            loadWeeklyToChart(weekly);
+                            break;
+                        case "Weekly Adjusted":
+                            RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
+                            weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
+                            loadWeeklyToChart(weeklyAdj);
+                            break;
+                        case "Monthly":
+                            RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
+                            monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
+                            loadMonthlyToChart(monthly);
+                            break;
+                        case "Monthly Adjusted":
+                            RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
+                            monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
+                            loadMonthlyToChart(monthlyAdj);
+                            break;
+                    }
+                }
             }
-            //Console.WriteLine("Here");
         }
 
+        private static Boolean isVolume = false;
         //Intraday daily data
         private void loadIntradayToChart(RootIntraday data)
         {
-            string[] keys = new string[data.oneMin.Keys.Count];
-            double[] values = new double[data.oneMin.Keys.Count];
+            string[] keys = new string[data.oneMin.Keys.Count];//keys are x axis (time/dates)
+            double[] values = new double[data.oneMin.Keys.Count];//values are y axis (numerical values of stock)
             int counter = 0;
             if (data.oneMin != null)
             {
@@ -398,7 +446,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.oneMin[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.oneMin[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
@@ -416,7 +467,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.fiveMin[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.fiveMin[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
@@ -434,7 +488,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.fifteenMin[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.fifteenMin[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
@@ -452,7 +509,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.thirtyMin[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.thirtyMin[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
@@ -470,18 +530,24 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.sixtyMin[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.sixtyMin[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
 
         //normal daily data
-        private void loadDailyToChart(RootDaily data)
+        private void loadDailyToChart(RootDaily data)//testing with this here for comparison
         {
             string[] keys = data.data.Keys.ToArray();
             double[] values = new double[data.data.Keys.Count];
@@ -499,14 +565,20 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
         //adjusted daily data
         private void loadDailyToChart(RootDailyAdj data)
@@ -527,7 +599,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     else if (desiredData == "Adjusted Close")
                         values[counter] = data.data[key].volume;
                     else if (desiredData == "Dividend Amount")
@@ -540,7 +615,10 @@ namespace Senior_Project_Stock_Tracker
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
         //normal weekly data
         private void loadWeeklyToChart(RootWeekly data)
@@ -561,14 +639,20 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
         //adjusted weekly data
         private void loadWeeklyToChart(RootWeeklyAdj data)
@@ -589,7 +673,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     else if (desiredData == "Adjusted Close")
                         values[counter] = data.data[key].volume;
                     else if (desiredData == "Dividend Amount")
@@ -602,7 +689,10 @@ namespace Senior_Project_Stock_Tracker
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
         //normal monthly data
         private void loadMonthlyToChart(RootMonthly data)
@@ -623,23 +713,27 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     counter++;
                 }
             }
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)//testing dl stuff
         {
             WebClient webClient = new WebClient();
             string url = "https://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
             string path = @"C:/Users/Mike/Downloads/companylist.csv";
-
-
         }
 
         private void SummaryQuoteLbl_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
@@ -666,7 +760,10 @@ namespace Senior_Project_Stock_Tracker
                     else if (desiredData == "Low")
                         values[counter] = data.data[key].low;
                     else if (desiredData == "Volume")
+                    {
                         values[counter] = data.data[key].volume;
+                        isVolume = true;
+                    }
                     else if (desiredData == "Adjusted Close")
                         values[counter] = data.data[key].volume;
                     else if (desiredData == "Dividend Amount")
@@ -679,12 +776,38 @@ namespace Senior_Project_Stock_Tracker
             else
                 Console.WriteLine("Error, all are null. Testing...");
 
-            loadDataToChart(data.metaData.Symbol, values, keys);
+            if (!isComparing)
+                loadDataToChart(data.metaData.Symbol, values, keys);
+            else
+                storeComparingStockData(data.metaData.Symbol, values, keys);
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if ((checkBox1.Checked && !checkBox2.Checked) || (!checkBox1.Checked && checkBox2.Checked))//used to make sure the user doesnt try to compare the stocks with two different time series
+            {
+                timeSeriesComboBox.Enabled = false;
+                timeSeriesIntervalComboBox.Enabled = false;
+            }
+            else
+                timeSeriesComboBox.Enabled = true;
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if ((checkBox1.Checked && !checkBox2.Checked) || (!checkBox1.Checked && checkBox2.Checked))//used to make sure the user doesnt try to compare the stocks with two different time series
+            {
+                timeSeriesComboBox.Enabled = false;
+                timeSeriesIntervalComboBox.Enabled = false;
+            }
+            else
+                timeSeriesComboBox.Enabled = true;
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
         {
-            cartesianChart1.Series = new SeriesCollection
+            Console.WriteLine("Keys: " + keys);
+            /*cartesianChart1.Series = new SeriesCollection
             {
                 //lines and their values
                 new LineSeries
@@ -692,7 +815,13 @@ namespace Senior_Project_Stock_Tracker
                     Title = selectedCompany + " (" + symbol + ")",
                     Values = new ChartValues<double> (values)
                 }
-            };
+            };*/
+
+            cartesianChart1.Series.Add(new LineSeries
+            {
+                Title = selectedCompany + " (" + symbol + ")",
+                Values = new ChartValues<double>(values)
+            });
 
             //bottom x axis labels
             cartesianChart1.AxisX.Add(new Axis
@@ -701,23 +830,108 @@ namespace Senior_Project_Stock_Tracker
                 Labels = keys
             });
 
-            //left side y axis labels
-            cartesianChart1.AxisY.Add(new Axis
+            if (isVolume)
             {
-                Title = "Values",
-                LabelFormatter = value => value.ToString("C")
+                cartesianChart1.AxisY.Add(new Axis
+                {
+                    Title = "Volume",
+                    LabelFormatter = value => value.ToString("N")
+                });
+            }
+            else
+            {//left side y axis labels
+                cartesianChart1.AxisY.Add(new Axis
+                {
+                    Title = "Values",
+                    LabelFormatter = value => value.ToString("C")
+                });
+            }
+            //right side legend
+            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+            isVolume = false;
+        }
+
+        private void loadDataToChartComparing()//layout needs fixed. Axis and data labels are using array indexes instead of dates for some reason
+        {
+            string[] keys1 = testingComp[0].keys;//can do this because same time frame means they'll have the same dates. (not sure about months though)
+            string[] keys2 = testingComp[1].keys;
+            Console.WriteLine("Keys: " + keys1);
+            cartesianChart1.Series.Add(new LineSeries
+            {
+                Title = stockMarketCompanies[testingComp[0].symbol].Name + " (" + testingComp[0].symbol + ")",
+                Values = new ChartValues<double>(testingComp[0].values),
             });
 
+            cartesianChart1.Series.Add(new LineSeries
+            {
+                Title = stockMarketCompanies[testingComp[1].symbol].Name + " (" + testingComp[1].symbol + ")",
+                Values = new ChartValues<double>(testingComp[1].values),
+            });
+
+            /*cartesianChart1.Series = new SeriesCollection
+            {
+                //lines and their values
+                new LineSeries
+                {
+                    Title = stockMarketCompanies[testingComp[0].symbol].Name + " (" + testingComp[0].symbol + ")",
+                    Values = new ChartValues<double> (testingComp[0].values),
+                },
+                new LineSeries
+                {
+                    Title = stockMarketCompanies[testingComp[1].symbol].Name + " (" + testingComp[1].symbol + ")",
+                    Values = new ChartValues<double> (testingComp[1].values),
+                }
+            };*/
+
+            //bottom x axis labels
+            cartesianChart1.AxisX.Add(new Axis
+            {
+                //Title = stockMarketCompanies[testingComp[0].symbol].Name + " Axis",
+                Labels = keys1,
+            });
+
+
+            /*cartesianChart1.AxisX.Add(new Axis
+            {
+                Title = stockMarketCompanies[testingComp[1].symbol].Name + " Axis",
+                Labels = keys2,
+                //Position = AxisPosition.RightTop
+            });*/
+
+            if (isVolume)
+            {
+                cartesianChart1.AxisY.Add(new Axis
+                {
+                    Title = "Volume",
+                    LabelFormatter = values => values.ToString("C")
+                });
+            }
+            else
+            {//left side y axis labels
+                cartesianChart1.AxisY.Add(new Axis
+                {
+                    Title = stockMarketCompanies[testingComp[0].symbol].Name + " Values",
+                    LabelFormatter = values => values.ToString("C")
+                });
+
+                cartesianChart1.AxisY.Add(new Axis
+                {
+                    Title = stockMarketCompanies[testingComp[1].symbol].Name + " Values",
+                    LabelFormatter = values => values.ToString("C"),
+                });
+            }
             //right side legend
-            cartesianChart1.LegendLocation = LegendLocation.Right;
+            cartesianChart1.LegendLocation = LegendLocation.Bottom;
+            isVolume = false;
         }
     }
 }
 /*
  * TODO:
  * add ability to compare stocks on chart
- * fix chart to show volume with correct axis labels etc
  * add option to track stocks
  * maybe add option to show different types of charts
  * ability to search for stocks, maybe with prediction like google search
  * */
+
+//cant do compare 3 stocks because api limits due to number of requests at once

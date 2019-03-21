@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CsvHelper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,16 +22,124 @@ namespace Senior_Project_Stock_Tracker
 {
     public class DataRetriever : Form
     {
+        public List<string> marketSectors = new List<string>();
+
+        public class companyInfo
+        {
+            public string Symbol { get; set; }
+            public string Name { get; set; }
+            public string IPOyear { get; set; }
+            public string Sector { get; set; }
+            public string industry { get; set; }
+        }
+
+        //NASDAQ
+        public Dictionary<string, companyInfo> stockMarketCompanies = new Dictionary<string, companyInfo>();//key is symbol
+        public Dictionary<string, List<string>> mapSymbolToSector = new Dictionary<string, List<string>>();//contains array of sectors, each key is a sector and values are the company names in the sector
+        public Dictionary<string, List<string>> mapNameToSymbol = new Dictionary<string, List<string>>();//key is company names, and value is company's symbol (may have more than one symbol)
+        public void loadNASDAQCompanies()//load the NASDAQ companies from the csv file
+        {
+            IEnumerable<companyInfo> records;
+            using (var reader = new StreamReader("NASDAQcompanylist.csv"))
+            using (var csv = new CsvReader(reader))
+            {
+                records = csv.GetRecords<companyInfo>();//contains each row of data from csv
+
+                foreach (companyInfo record in records)
+                {
+                    //store list of sectors for nasdaq without duplicates in arraylist
+                    if (!marketSectors.Contains(record.Sector))
+                        marketSectors.Add(record.Sector);
+
+                    //create the objects for each Company (row) and store them in the NASDAQ_DATA dictionary as values, using their symbol's as the keys
+                    //symbol, object containing data
+                    //NASDAQ_Data.Add(record.Symbol, new NASDAQ_CSV_Data(/*record.Symbol, record.Name, record.IPOyear, record.Sector, record.industry*/));
+                    stockMarketCompanies.Add(record.Symbol, record);
+
+
+                    //stuff for mapping companies to symbols (solves problem for when a company has multiple symbols)
+                    if (mapNameToSymbol.ContainsKey(record.Name))//contains the company name (key), so add symbol to list
+                    {
+                        List<string> list = mapNameToSymbol[record.Name];//find sector and add the company to the list according to appropriate sector
+                        list.Add(record.Symbol);
+                    }
+                    else//add the new company name and a new list to go with it storing symbols (only hits here the first time a new company is found)
+                    {
+                        var list = new List<string>() { record.Symbol };
+                        mapNameToSymbol.Add(record.Name, list);
+                    }
+
+                    //stuff for sectors and loading companies in combobox
+                    if (mapSymbolToSector.ContainsKey(record.Sector))//contains the key, so just update the list to the appropriate key
+                    {
+                        List<string> list = mapSymbolToSector[record.Sector];//find sector and add the company to the list according to appropriate sector
+                        list.Add(record.Name);
+                    }
+                    else//add the new sector and a new list to go with the sector (only hits here the first time a new sector is found)
+                    {
+                        //stuff for adding sectors and list the companies in the combobox
+                        var list = new List<string>() { record.Name };
+                        mapSymbolToSector.Add(record.Sector, list);
+                    }
+                }
+            }
+        }
+
+        //NYSE companies
+        public void loadNYSECompanies()//load the NYSE companies from the csv file
+        {
+            IEnumerable<companyInfo> records;
+            using (var reader = new StreamReader("NYSEcompanylist.csv"))
+            using (var csv = new CsvReader(reader))
+            {
+                records = csv.GetRecords<companyInfo>();//contains each row of data from csv
+
+                foreach (companyInfo record in records)
+                {
+                    if (!marketSectors.Contains(record.Sector))
+                        marketSectors.Add(record.Sector);
+
+                    if (!stockMarketCompanies.ContainsKey(record.Symbol))//check if it doesn't contain key. Some companies are listed on both NASDAQ and NYSE
+                        stockMarketCompanies.Add(record.Symbol, record);
+
+
+                    //stuff for mapping companies to symbols (solves problem for when a company has multiple symbols)
+                    if (mapNameToSymbol.ContainsKey(record.Name))//contains the company name (key), so add symbol to list
+                    {
+                        List<string> list = mapNameToSymbol[record.Name];//find sector and add the company to the list according to appropriate sector
+                        list.Add(record.Symbol);
+                    }
+                    else//add the new company name and a new list to go with it storing symbols (only hits here the first time a new company is found)
+                    {
+                        var list = new List<string>() { record.Symbol };
+                        mapNameToSymbol.Add(record.Name, list);
+                    }
+
+                    //stuff for sectors and loading companies in combobox
+                    if (mapSymbolToSector.ContainsKey(record.Sector))//contains the key, so just update the list to the appropriate key
+                    {
+                        List<string> list = mapSymbolToSector[record.Sector];//find sector and add the company to the list according to appropriate sector
+                        list.Add(record.Name);
+                    }
+                    else//add the new sector and a new list to go with the sector (only hits here the first time a new sector is found)
+                    {
+                        //stuff for adding sectors and list the companies in the combobox
+                        var list = new List<string>() { record.Name };
+                        mapSymbolToSector.Add(record.Sector, list);
+                    }
+                }
+            }
+        }
+
         private static String programPath = Directory.GetCurrentDirectory();
         private static HttpClient httpClient = new HttpClient();
         public string timeSeriesFlag;
 
         protected static async Task<string> retrieveSymbolData(string timeSeries, string stockSymbol, string interval)
         {
-            String urlStringTest = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
-            //String urlStringTest = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=X0REJIV6R6ROZS3T";
-            Console.WriteLine("URL: " + urlStringTest);
-            var json = await httpClient.GetAsync(urlStringTest);
+            String urlString = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
+            //Console.WriteLine(urlString);
+            var json = await httpClient.GetAsync(urlString);
             return await json.Content.ReadAsStringAsync();
         }
 
@@ -173,6 +282,12 @@ namespace Senior_Project_Stock_Tracker
             public double dividend_amount { get; set; }
             [JsonProperty("8. split coefficient", NullValueHandling = NullValueHandling.Ignore)]
             public double split_coefficient { get; set; }
+        }
+
+        //For when the json data is null because of 5 request per min is exceeded
+        public class ExceededReq
+        {
+            public string Note { get; set; }
         }
     }
 }

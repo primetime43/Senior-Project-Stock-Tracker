@@ -33,7 +33,7 @@ namespace Senior_Project_Stock_Tracker
             //selectedCompany = selectedCompany.Replace(' ', '-');
             Console.WriteLine("Company: " + selectedCompany);
             //var json = await httpClient.GetAsync("https://newsapi.org/v2/top-headlines?country=us&apiKey=94b9e25568ca4ee3bef44fc4c7ae335e");
-            var json = await httpClient.GetAsync("https://newsapi.org/v2/everything?q=" + selectedCompany + "&language=en&sortBy=relevancy&apiKey=94b9e25568ca4ee3bef44fc4c7ae335e");
+            var json = await httpClient.GetAsync("https://newsapi.org/v2/everything?q=" + selectedCompany + "&language=en&sortBy=popularity&apiKey=94b9e25568ca4ee3bef44fc4c7ae335e");
             var jsonAsString = await json.Content.ReadAsStringAsync();
 
             test1 = JsonConvert.DeserializeObject<RootObject>(jsonAsString);

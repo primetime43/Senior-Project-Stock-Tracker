@@ -34,6 +34,8 @@
             this.ModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stockTrackerToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fakeStockTrainerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.downloadUpdatedCompaniesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stockMarketStatusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.companyNewsBtn = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -88,7 +90,8 @@
             // 
             this.ModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.stockTrackerToolStripMenuItem1,
-            this.fakeStockTrainerToolStripMenuItem});
+            this.fakeStockTrainerToolStripMenuItem,
+            this.optionsToolStripMenuItem});
             this.ModeToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ModeToolStripMenuItem.Name = "ModeToolStripMenuItem";
             this.ModeToolStripMenuItem.Size = new System.Drawing.Size(60, 24);
@@ -96,7 +99,7 @@
             // 
             // stockTrackerToolStripMenuItem1
             // 
-            this.stockTrackerToolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.stockTrackerToolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.stockTrackerToolStripMenuItem1.Name = "stockTrackerToolStripMenuItem1";
             this.stockTrackerToolStripMenuItem1.Size = new System.Drawing.Size(196, 24);
             this.stockTrackerToolStripMenuItem1.Text = "Stock Tracker";
@@ -106,6 +109,21 @@
             this.fakeStockTrainerToolStripMenuItem.Name = "fakeStockTrainerToolStripMenuItem";
             this.fakeStockTrainerToolStripMenuItem.Size = new System.Drawing.Size(196, 24);
             this.fakeStockTrainerToolStripMenuItem.Text = "Fake Stock Trainer";
+            // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.downloadUpdatedCompaniesToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(196, 24);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // downloadUpdatedCompaniesToolStripMenuItem
+            // 
+            this.downloadUpdatedCompaniesToolStripMenuItem.Name = "downloadUpdatedCompaniesToolStripMenuItem";
+            this.downloadUpdatedCompaniesToolStripMenuItem.Size = new System.Drawing.Size(287, 24);
+            this.downloadUpdatedCompaniesToolStripMenuItem.Text = "Download Updated Companies";
+            this.downloadUpdatedCompaniesToolStripMenuItem.Click += new System.EventHandler(this.downloadUpdatedCompaniesToolStripMenuItem_Click);
             // 
             // stockMarketStatusToolStripMenuItem
             // 
@@ -130,7 +148,7 @@
             // 
             this.textBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.textBox1.Cursor = System.Windows.Forms.Cursors.SizeWE;
+            this.textBox1.Cursor = System.Windows.Forms.Cursors.Default;
             this.textBox1.Location = new System.Drawing.Point(10, 296);
             this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.textBox1.Name = "textBox1";
@@ -477,7 +495,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "StockTrackMain";
             this.Text = "Stock Market Tracker";
             this.menuStrip1.ResumeLayout(false);
@@ -529,6 +547,8 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.ToolStripMenuItem stockMarketStatusToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem downloadUpdatedCompaniesToolStripMenuItem;
     }
 }
 

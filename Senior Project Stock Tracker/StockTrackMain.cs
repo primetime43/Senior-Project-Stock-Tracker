@@ -5,14 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 //API Key: X0REJIV6R6ROZS3T
 //News API Key: 94b9e25568ca4ee3bef44fc4c7ae335e
-
-//Need to figure out how to dl new csv file after each day (problem: cant dl from url for some reason, some type of protection maybe. Creates file with 0 bytes)
-//csv file download links: https://www.nasdaq.com/screening/company-list.aspx
 
 namespace Senior_Project_Stock_Tracker
 {
@@ -848,6 +845,30 @@ namespace Senior_Project_Stock_Tracker
             }
             else
                 timeSeriesComboBox.Enabled = true;
+        }
+
+        private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process proc = new Process();
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.WindowStyle = ProcessWindowStyle.Hidden;
+            psi.WorkingDirectory = Environment.CurrentDirectory;
+            psi.CreateNoWindow = true;
+            psi.FileName = "cmd.exe";
+            psi.Arguments = "/c java DownloadCsvFiles";
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            proc.StartInfo = psi;
+            proc.Start();
+            proc.BeginOutputReadLine();
+            proc.WaitForExit();
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show("Close and reopen the program for changes to take place\nClose now?", "Company Files Updated", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+
+            if(result == System.Windows.Forms.DialogResult.Yes)
+                this.Close();
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)

@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 /*Notes
  * Syncronously - will freeze UI
- * Asynchronously - will not freeze UI (same as backgroundworkers but newer)
+ * Asynchronously - will not freeze UI
 */
 
 namespace Senior_Project_Stock_Tracker

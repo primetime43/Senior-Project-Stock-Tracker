@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 //API Key: X0REJIV6R6ROZS3T
 //News API Key: 94b9e25568ca4ee3bef44fc4c7ae335e
@@ -22,11 +23,48 @@ namespace Senior_Project_Stock_Tracker
             InitializeComponent();
             loadNASDAQCompanies();
             loadNYSECompanies();
+            String[] myArray = mapNameToSymbol.Keys.ToArray();//testing
+            textBox1.AutoCompleteCustomSource.AddRange(myArray);//test for search
             loadSectors();
             timeSeriesComboBox.SelectedItem = "Intraday";
             timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
             desiredDataComboBox.SelectedItem = "Open";
             sectorsComboBox.SelectedIndex = 0;
+            CheckTime();
+        }
+
+        private void CheckTime()
+        {
+            DateTime localTime = DateTime.Now;
+            TimeZoneInfo USEasternTime = TimeZoneInfo.FindSystemTimeZoneById("US Eastern Standard Time");
+            DateTime currentTime = TimeZoneInfo.ConvertTime(localTime, USEasternTime);
+
+            int hour = int.Parse(currentTime.ToString("HH"));
+            int minutes = int.Parse(currentTime.ToString("mm"));
+            bool status = false;
+            if ((hour > 9 && hour < 16) && (currentTime.DayOfWeek.ToString() != "Saturday" && currentTime.DayOfWeek.ToString() != "Sunday"))//open hours
+            {
+                if(hour == 9 && minutes >= 30)//check if its 9 and if its 9:30 or greater
+                {
+                    this.BackColor = System.Drawing.Color.White;//open
+                    status = true;
+                }
+                else//is 9 but not past 9:30 yet
+                    this.BackColor = System.Drawing.SystemColors.Control;
+            }
+            else
+                this.BackColor = System.Drawing.SystemColors.Control;
+
+            if (status)
+            {
+                stockMarketStatusToolStripMenuItem.Text = "Stock Market: Open";
+                stockMarketStatusToolStripMenuItem.ForeColor = System.Drawing.Color.Green;
+            }
+            else
+            {
+                stockMarketStatusToolStripMenuItem.Text = "Stock Market: Closed";
+                stockMarketStatusToolStripMenuItem.ForeColor = System.Drawing.Color.Red;
+            }
         }
 
         public void loadSectors()
@@ -125,7 +163,10 @@ namespace Senior_Project_Stock_Tracker
             foreach (string value in listValues)
             {
                 if (!companyListingslistBox.Items.Contains(value))//so the company doesnt get added multiple times to listbox (when there are multiple symbols for a company)
+                {
                     companyListingslistBox.Items.Add(value);
+                    //textBox1.AutoCompleteCustomSource.AddRange(listValues);//test for search
+                }
             }
         }
 
@@ -164,7 +205,7 @@ namespace Senior_Project_Stock_Tracker
 
         private Boolean isComparing = false;
         public Dictionary<int, CompareStocksObj> testingComp = new Dictionary<int, CompareStocksObj>();//key is symbol 
-        private async void compareStocks()//testing
+        private async void compareStocks()//testing for comparing stocks. Still buggy
         {
             isComparing = true;
             int numOfStocksToCompare = 0;
@@ -190,7 +231,7 @@ namespace Senior_Project_Stock_Tracker
 
                 ExceededReq notify = new ExceededReq();
                 notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
-                if (notify.Note != null)//temp for testing
+                if (notify.Note != null)//temp for testing. Notifies user that API limit reached
                 {
                     MessageBox.Show(notify.Note.ToString());
                     return;
@@ -382,7 +423,6 @@ namespace Senior_Project_Stock_Tracker
                 }
                 else
                 {
-
                     switch (timeSeriesFlag)
                     {
                         case "Intraday":
@@ -729,11 +769,17 @@ namespace Senior_Project_Stock_Tracker
                 storeComparingStockData(data.metaData.Symbol, values, keys);
         }
 
-        private void button3_Click(object sender, EventArgs e)//testing dl stuff
+        private void buttonLocateCompany_Click(object sender, EventArgs e)
         {
-            WebClient webClient = new WebClient();
-            string url = "https://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
-            string path = @"C:/Users/Mike/Downloads/companylist.csv";
+            if (mapNameToSymbol.ContainsKey(textBox1.Text))
+            {
+                selectedCompany = textBox1.Text;
+                sectorsComboBox.SelectedItem = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].Sector;
+                companyListingslistBox.SelectedItem = textBox1.Text;
+                displayAdditionalInfo();
+            }
+            else
+                MessageBox.Show("Unable to locate company!");
         }
 
         private void SummaryQuoteLbl_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
@@ -928,10 +974,10 @@ namespace Senior_Project_Stock_Tracker
 }
 /*
  * TODO:
- * add ability to compare stocks on chart
+ * add ability to compare stocks on chart (needs fixed)
  * add option to track stocks
  * maybe add option to show different types of charts
- * ability to search for stocks, maybe with prediction like google search
+ * add daily high & low and 52 weeks high & low
  * */
 
 //cant do compare 3 stocks because api limits due to number of requests at once

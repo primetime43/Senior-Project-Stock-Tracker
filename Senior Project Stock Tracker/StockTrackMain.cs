@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
+using System.Net.Http;
+using System.IO;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 //API Key: X0REJIV6R6ROZS3T
 //News API Key: 94b9e25568ca4ee3bef44fc4c7ae335e
@@ -17,17 +18,31 @@ namespace Senior_Project_Stock_Tracker
     {
         public StockTrackMain()
         {
+            //testing
             InitializeComponent();
-            loadNASDAQCompanies();
-            loadNYSECompanies();
-            String[] myArray = mapNameToSymbol.Keys.ToArray();//testing
-            textBox1.AutoCompleteCustomSource.AddRange(myArray);//test for search
-            loadSectors();
-            timeSeriesComboBox.SelectedItem = "Intraday";
-            timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
-            desiredDataComboBox.SelectedItem = "Open";
-            sectorsComboBox.SelectedIndex = 0;
-            CheckTime();
+            if (!File.Exists(Directory.GetCurrentDirectory() + "\\NASDAQcompanylist.csv") || !File.Exists(Directory.GetCurrentDirectory() + "\\NYSEcompanylist.csv"))//if one of the two files don't exist, download them
+            {
+                System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show("Important Files Are Missing\nDownload them now?", "Missing Files", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                    downloadRequiredFiles();
+            }
+            else
+            {
+                File.SetAttributes("NASDAQcompanylist.csv", FileAttributes.Hidden);
+                File.SetAttributes("NYSEcompanylist.csv", FileAttributes.Hidden);
+                loadNASDAQCompanies();
+                loadNYSECompanies();
+                String[] myArray = mapNameToSymbol.Keys.ToArray();//testing
+                textBox1.AutoCompleteCustomSource.AddRange(myArray);//test for search
+                loadSectors();
+                timeSeriesComboBox.SelectedItem = "Intraday";
+                timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
+                desiredDataComboBox.SelectedItem = "Open";
+                sectorsComboBox.SelectedIndex = 0;
+                readTrackedStocks();
+                CheckTime();
+            }
         }
 
         private void CheckTime()
@@ -41,7 +56,7 @@ namespace Senior_Project_Stock_Tracker
             bool status = false;
             if ((hour > 9 && hour < 16) && (currentTime.DayOfWeek.ToString() != "Saturday" && currentTime.DayOfWeek.ToString() != "Sunday"))//open hours
             {
-                if(hour == 9 && minutes >= 30)//check if its 9 and if its 9:30 or greater
+                if (hour == 9 && minutes >= 30 || hour > 9)//check if its 9 and if its 9:30 or greater OR past 9 so open
                 {
                     this.BackColor = System.Drawing.Color.White;//open
                     status = true;
@@ -87,16 +102,16 @@ namespace Senior_Project_Stock_Tracker
 
         private static Boolean flag = true;
         private void companyListingslistBox_SelectedIndexChanged(object sender, EventArgs e)//load the companies into the listbox
-        {
+        {//need to fix it to not called api data from this, only from display chart button
             if (companyListingslistBox.SelectedIndex == -1)//no item selected
                 updateChartBtn.Enabled = false;
             else
                 updateChartBtn.Enabled = true;
-            checkForMultipleSymbols();
+            checkForMultipleSymbols(); //testing here
         }
 
         private static string selectedCompany;
-        private async void checkForMultipleSymbols()
+        private async Task checkForMultipleSymbols()
         {
             selectedCompany = companyListingslistBox.GetItemText(companyListingslistBox.SelectedItem);
             if (flag)//load the companies names into listbox
@@ -114,19 +129,22 @@ namespace Senior_Project_Stock_Tracker
             setComparedStocks();
         }
 
-        private async void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
+        private void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
         {
-            if (mapNameToSymbol[selectedCompanyName].Count > 1)//selected company has more than one symbol
+            if (mapNameToSymbol[selectedCompanyName].Count > 1)//selected company has more than one symbol (iterate through to check for more than 1 symbol)
             {
                 companyListingslistBox.Items.Clear();//clear the companies listbox to load the symbols
                 foreach (var listMember in mapNameToSymbol[selectedCompanyName])//mapped symbol to sector because symbols are unique values and some companies have multiple symbols in different sectors
                 {
                     companyListingslistBox.Items.Add(listMember);//load symbols into the listbox
-                    flag = false;//set flag to false to 
+                    flag = false;//set flag to false to get into the else statement in checkForMultipleSymbols method 
                 }
             }
-            else//one symbol, search mapNameToSymbol to find symbol for company name
-                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
+            /*else//one symbol, search mapNameToSymbol to find symbol for company name
+            {
+
+                //symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
+            }*///from here, the json data is somehow lost (data is null without break point for some reason) (may be fixed, not 100% sure yet)
             displayAdditionalInfo();
         }
 
@@ -160,10 +178,7 @@ namespace Senior_Project_Stock_Tracker
             foreach (string value in listValues)
             {
                 if (!companyListingslistBox.Items.Contains(value))//so the company doesnt get added multiple times to listbox (when there are multiple symbols for a company)
-                {
                     companyListingslistBox.Items.Add(value);
-                    //textBox1.AutoCompleteCustomSource.AddRange(listValues);//test for search
-                }
             }
         }
 
@@ -394,7 +409,7 @@ namespace Senior_Project_Stock_Tracker
 
         //back bone for retrieving and loading data to the chart
         private string symbolJSONreturn = "";
-        private void updateChartBtn_Click(object sender, EventArgs e)
+        private async void updateChartBtn_Click(object sender, EventArgs e)//testing the async
         {
             if ((!checkBox1.Checked && checkBox2.Checked) || (checkBox1.Checked && !checkBox2.Checked))//if one checkbox is checked, notify user
             {
@@ -407,17 +422,22 @@ namespace Senior_Project_Stock_Tracker
             cartesianChart1.AxisY.Clear();
             cartesianChart1.Visible = true;
 
+            //await checkForMultipleSymbols();//testing
+
             if (checkBox1.Checked && checkBox2.Checked)//both are checked, user wants to compare the two stocks
                 compareStocks();
             else//no comparing, just load the single stock on the graph
             {
+                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompany][0], selectedTimeSeriesInterval);
+                //testing from here
                 ExceededReq notify = new ExceededReq();
                 notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
-                if (notify.Note != null)//for when the api notifies user must wait to make more request due to free api restrictions
+                if (notify != null && notify.Note != null || notify.Note == "")//for when the api notifies user must wait to make more request due to free api restrictions (bug, crashing here sometimes)
                 {
                     MessageBox.Show(notify.Note.ToString());
                     return;
                 }
+                //to here
                 else
                 {
                     switch (timeSeriesFlag)
@@ -464,13 +484,15 @@ namespace Senior_Project_Stock_Tracker
 
         private static Boolean isVolume = false;
         //Intraday daily data
-        private void loadIntradayToChart(RootIntraday data)
+        private void loadIntradayToChart(RootIntraday data)//seems to have some bugs, need to fix; it shows index on chart points, instead of date/time (only happens on intraday)
         {
-            string[] keys = new string[data.oneMin.Keys.Count];//keys are x axis (time/dates)
-            double[] values = new double[data.oneMin.Keys.Count];//values are y axis (numerical values of stock)
+            string[] keys = null;
+            double[] values = null;
             int counter = 0;
             if (data.oneMin != null)
             {
+                keys = new string[data.oneMin.Keys.Count];//keys are x axis (time/dates)
+                values = new double[data.oneMin.Keys.Count];//values are y axis (numerical values of stock)
                 keys = data.oneMin.Keys.ToArray();
                 foreach (var key in data.oneMin.Keys)
                 {
@@ -492,6 +514,8 @@ namespace Senior_Project_Stock_Tracker
             }
             else if (data.fiveMin != null)
             {
+                keys = new string[data.fiveMin.Keys.Count];//keys are x axis (time/dates)
+                values = new double[data.fiveMin.Keys.Count];//values are y axis (numerical values of stock)
                 keys = data.fiveMin.Keys.ToArray();
                 foreach (var key in data.fiveMin.Keys)
                 {
@@ -513,6 +537,8 @@ namespace Senior_Project_Stock_Tracker
             }
             else if (data.fifteenMin != null)
             {
+                keys = new string[data.fifteenMin.Keys.Count];//keys are x axis (time/dates)
+                values = new double[data.fifteenMin.Keys.Count];//values are y axis (numerical values of stock)
                 keys = data.fifteenMin.Keys.ToArray();
                 foreach (var key in data.fifteenMin.Keys)
                 {
@@ -534,6 +560,8 @@ namespace Senior_Project_Stock_Tracker
             }
             else if (data.thirtyMin != null)
             {
+                keys = new string[data.thirtyMin.Keys.Count];//keys are x axis (time/dates)
+                values = new double[data.thirtyMin.Keys.Count];//values are y axis (numerical values of stock)
                 keys = data.thirtyMin.Keys.ToArray();
                 foreach (var key in data.thirtyMin.Keys)
                 {
@@ -555,6 +583,8 @@ namespace Senior_Project_Stock_Tracker
             }
             else if (data.sixtyMin != null)
             {
+                keys = new string[data.sixtyMin.Keys.Count];//keys are x axis (time/dates)
+                values = new double[data.sixtyMin.Keys.Count];//values are y axis (numerical values of stock)
                 keys = data.sixtyMin.Keys.ToArray();
                 foreach (var key in data.sixtyMin.Keys)
                 {
@@ -774,6 +804,7 @@ namespace Senior_Project_Stock_Tracker
                 sectorsComboBox.SelectedItem = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].Sector;
                 companyListingslistBox.SelectedItem = textBox1.Text;
                 displayAdditionalInfo();
+                companyListingslistBox.Focus();
             }
             else
                 MessageBox.Show("Unable to locate company!");
@@ -845,30 +876,6 @@ namespace Senior_Project_Stock_Tracker
             }
             else
                 timeSeriesComboBox.Enabled = true;
-        }
-
-        private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Process proc = new Process();
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow = true;
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.WindowStyle = ProcessWindowStyle.Hidden;
-            psi.WorkingDirectory = Environment.CurrentDirectory;
-            psi.CreateNoWindow = true;
-            psi.FileName = "cmd.exe";
-            psi.Arguments = "/c java DownloadCsvFiles";
-            psi.RedirectStandardOutput = true;
-            psi.UseShellExecute = false;
-            proc.StartInfo = psi;
-            proc.Start();
-            proc.BeginOutputReadLine();
-            proc.WaitForExit();
-
-            System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show("Close and reopen the program for changes to take place\nClose now?", "Company Files Updated", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
-
-            if(result == System.Windows.Forms.DialogResult.Yes)
-                this.Close();
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
@@ -991,6 +998,76 @@ namespace Senior_Project_Stock_Tracker
             cartesianChart1.LegendLocation = LegendLocation.Bottom;
             isVolume = false;
         }
+
+        private void addTrackCompanyButton_Click(object sender, EventArgs e)
+        {
+            using (var tw = new StreamWriter(Directory.GetCurrentDirectory() + "\\trackedStocks.txt", true))
+            {
+                tw.WriteLine(selectedCompany);
+            }
+        }
+
+        private void readTrackedStocks()//read the stocks from the file that the user is tracking
+        {
+            string filePath = Directory.GetCurrentDirectory() + "\\trackedStocks.txt";
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Dispose();
+                File.SetAttributes(filePath, FileAttributes.Hidden);
+            }
+            else
+            {
+                List<string> linesList = File.ReadAllLines(Directory.GetCurrentDirectory() + "\\trackedStocks.txt").ToList();
+                foreach (string t in linesList)
+                    trackedCompaniesComboBox.Items.Add(t);
+            }
+        }
+
+        private void removeTrackCompanyButton_Click(object sender, EventArgs e)
+        {
+            List<string> linesList = File.ReadAllLines(Directory.GetCurrentDirectory() + "\\trackedStocks.txt").ToList();
+            using (var tw = new StreamWriter(Directory.GetCurrentDirectory() + "\\trackedStocks.txt", false))//false makes it overwrite the file
+            {
+                linesList.Remove(trackedCompaniesComboBox.SelectedText);//remove it from list, to later rewrite the new list to txt file updated without the removed item
+                trackedCompaniesComboBox.Items.Remove(trackedCompaniesComboBox.SelectedText);//remove the selected company
+                foreach (string t in linesList)//rewrite new list to txt file and overwrite the old one
+                    tw.WriteLine(t);
+            }
+        }
+
+        private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            downloadRequiredFiles();
+        }
+
+        private async void downloadRequiredFiles()
+        {
+            var http = new HttpClient();
+            http.DefaultRequestHeaders.Add("Host", "www.nasdaq.com");
+            http.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            http.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+
+            //NASDAQ csv file download
+            var response = await http.GetAsync("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nasdaq&render=download");// by calling .Result you are synchronously reading the result
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            using (var fs = File.Open("NASDAQcompanylist.csv", FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+            {
+                await fs.WriteAsync(bytes, 0, bytes.Length);
+            }
+
+            //NYSE csv file download
+            response = await http.GetAsync("https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download");
+            bytes = await response.Content.ReadAsByteArrayAsync();
+            using (var fs = File.Open("NYSEcompanylist.csv", FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+            {
+                await fs.WriteAsync(bytes, 0, bytes.Length);
+            }
+            //could program it to reload the new data, but is easier just to close and reopen the program
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.MessageBox.Show("Close and reopen the program for changes to take place\nClose now?", "Files Downloaded", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+
+            if (result == System.Windows.Forms.DialogResult.Yes)
+                this.Close();
+        }
     }
 }
 /*
@@ -1002,3 +1079,4 @@ namespace Senior_Project_Stock_Tracker
  * */
 
 //cant do compare 3 stocks because api limits due to number of requests at once
+//super weird bug having to do with searching a company then trying to display chart without focusing on another object on form. Doesn't seem to occur always.

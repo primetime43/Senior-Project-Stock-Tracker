@@ -1001,10 +1001,18 @@ namespace Senior_Project_Stock_Tracker
 
         private void addTrackCompanyButton_Click(object sender, EventArgs e)
         {
-            using (var tw = new StreamWriter(Directory.GetCurrentDirectory() + "\\trackedStocks.txt", true))
+            List<string> linesList = File.ReadAllLines(Directory.GetCurrentDirectory() + "\\trackedStocks.txt").ToList();
+            if (!linesList.Contains(selectedCompany))
             {
-                tw.WriteLine(selectedCompany);
+                trackedCompaniesComboBox.Items.Add(selectedCompany);
+                using (var tw = new StreamWriter(Directory.GetCurrentDirectory() + "\\trackedStocks.txt", true))
+                {
+                    tw.WriteLine(selectedCompany);
+                }
+                MessageBox.Show(selectedCompany + " added");
             }
+            else
+                MessageBox.Show(selectedCompany + " is already being tracked");
         }
 
         private void readTrackedStocks()//read the stocks from the file that the user is tracking
@@ -1025,14 +1033,20 @@ namespace Senior_Project_Stock_Tracker
 
         private void removeTrackCompanyButton_Click(object sender, EventArgs e)
         {
-            List<string> linesList = File.ReadAllLines(Directory.GetCurrentDirectory() + "\\trackedStocks.txt").ToList();
-            using (var tw = new StreamWriter(Directory.GetCurrentDirectory() + "\\trackedStocks.txt", false))//false makes it overwrite the file
+            string path = Directory.GetCurrentDirectory() + "\\trackedStocks.txt";
+            File.SetAttributes(path, FileAttributes.Normal);
+            string companyToRemove = trackedCompaniesComboBox.Text;
+            List<string> linesList = File.ReadAllLines(path).ToList();
+            linesList.Remove(companyToRemove);//remove it from list, to later rewrite the new list to txt file updated without the removed item
+            trackedCompaniesComboBox.Items.Remove(companyToRemove);//remove the selected company
+            File.WriteAllText(path, String.Empty);
+            using (var tw = new StreamWriter(File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite)))
             {
-                linesList.Remove(trackedCompaniesComboBox.SelectedText);//remove it from list, to later rewrite the new list to txt file updated without the removed item
-                trackedCompaniesComboBox.Items.Remove(trackedCompaniesComboBox.SelectedText);//remove the selected company
                 foreach (string t in linesList)//rewrite new list to txt file and overwrite the old one
                     tw.WriteLine(t);
             }
+            File.SetAttributes(path, FileAttributes.Hidden);
+            MessageBox.Show(companyToRemove + " removed");
         }
 
         private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)

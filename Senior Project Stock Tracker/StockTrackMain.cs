@@ -885,8 +885,7 @@ namespace Senior_Project_Stock_Tracker
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
-        {
-            Console.WriteLine("Keys: " + keys);
+        {//intraday dates need fixed (works for 60 min but not anything down from there)
             /*cartesianChart1.Series = new SeriesCollection
             {
                 //lines and their values

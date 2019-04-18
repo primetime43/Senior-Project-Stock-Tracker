@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Windows;
+using System.Globalization;
 
 namespace Senior_Project_Stock_Tracker
 {
@@ -11,108 +13,104 @@ namespace Senior_Project_Stock_Tracker
         public FakeStockPurchaser()
         {
             InitializeComponent();
-            
+            string[] myArray = mapNameToSymbol.Keys.ToArray();//testing
+            searchTxtBox.AutoCompleteCustomSource.AddRange(myArray);//test for search
 
         }
-        
-        public static long startingCash = 0;
-        public static long currentCash = 0;
-        public static long currentStockVal = 0;
 
-        Dictionary<String, StockItem> stocks = new Dictionary<String, StockItem>();
+        public static double startingCash;
+        public static double currentCash;
+        public static double currentStockVal;
+        private string companyName;
+
+        Dictionary<string, StockItem> stocks = new Dictionary<string, StockItem>();
         private void FakeStockPurchaser_Load(object sender, EventArgs e)
         {
 
             groupBox1.Text = NewUserForm.name + "'s Wallet";
-            strCashLbl.Text = NewUserForm.money.ToString();
-            currentCashLbl.Text = NewUserForm.money.ToString();
+            strCashLbl.Text = NewUserForm.money.ToString("C2", CultureInfo.CurrentCulture);
+            currentCashLbl.Text = NewUserForm.money.ToString("C2", CultureInfo.CurrentCulture);
             stockValLbl.Text = "" + 0;
             startingCash = NewUserForm.money;
-            listBox2.Items.Clear();
+            companiesListBox.Items.Clear();
             foreach(KeyValuePair<string, List<string>> entry in mapNameToSymbol)
             {
                 string value = entry.Key.ToString();
-                if (!listBox2.Items.Contains(value))//so the company doesnt get added multiple times to listbox (when there are multiple symbols for a company)
-                    listBox2.Items.Add(value);
+                if (!companiesListBox.Items.Contains(value))//so the company doesnt get added multiple times to listbox (when there are multiple symbols for a company)
+                    companiesListBox.Items.Add(value);
             }
-
-            listBox2.Sorted = true;
-
-            
-            
         }
             
         
         private void button1_Click(object sender, EventArgs e)
         {
-            String company = textBox1.Text;
-
-
-
-
+            if (mapNameToSymbol.ContainsKey(searchTxtBox.Text))
+            {
+                companyName = searchTxtBox.Text;
+                companiesListBox.SelectedItem = searchTxtBox.Text;
+                companiesListBox.Focus();
+            }
+            else
+                MessageBox.Show("Unable to locate company!");
         }
 
         private void buyBtn_Click(object sender, EventArgs e)
         {
             StockItem current = new StockItem();
-            current.name = listBox2.SelectedItem.ToString();
+            current.name = companiesListBox.SelectedItem.ToString();
             current.symbol = stockNameLbl.Text;
-            current.purchasePrice = long.Parse(stockPriceLbl.Text);
-            current.quantity = int.Parse(quantity.Text);
-            current.value = current.quantity * current.purchasePrice;
-            currentStockVal += current.value;
-            currentCash -= current.value;
+            current.purchasePrice = intraday.oneMin[keys[0]].open;//crashing here
+            current.quantity = Convert.ToInt32(numericUpDown1.Value); 
+            current.value = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
+            currentStockVal += Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
+            currentCash = startingCash - Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
 
-            currentCashLbl.Text = currentCash.ToString();
-            stockValLbl.Text = currentStockVal.ToString();
+            currentCashLbl.Text = currentCash.ToString("C2", CultureInfo.CurrentCulture);
+            stockValLbl.Text = currentStockVal.ToString("C2", CultureInfo.CurrentCulture);
 
-            stocks.Add(current.symbol, current);
-            listBox1.Items.Add(current.name);
+            /*stocks.Add(current.symbol, current);
+            StockOwnedListBox.Items.Add(current.name);*/
             
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            String companyName = listBox1.SelectedItem.ToString();
+            companyName = StockOwnedListBox.SelectedItem.ToString();
             quantOwnLbl.Text = "";
             purchPriceLbl.Text = "";
             curPriceLbl.Text = "";
             currValLbl.Text = "";
         }
 
+        private static double currentStockPrice;
+        private RootIntraday intraday;
+        string[] keys;
         private async void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            stockNameLbl.Text = mapNameToSymbol[listBox2.SelectedItem.ToString()][0];
+            numericUpDown1.Value = 1;
+            intraday = null;
+            keys = null;
+            stockNameLbl.Text = mapNameToSymbol[companiesListBox.SelectedItem.ToString()][0];
 
+            string symbolJSONreturn = await retrieveSymbolData("TIME_SERIES_INTRADAY", mapNameToSymbol[companiesListBox.SelectedItem.ToString()][0], "1min");
 
-            String symbolJSONreturn = await retrieveSymbolData("TIME_SERIES_INTRADAY", mapNameToSymbol[listBox2.SelectedItem.ToString()][0], "1min");
-
-            RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
+            intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
             intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
-            Console.WriteLine(intraday);
-            String[] keys = null;
+
+            //need to add a throw so when user reaches max api requests
             keys = new string[intraday.oneMin.Keys.Count];
             keys = intraday.oneMin.Keys.ToArray();
-            stockPriceLbl.Text = intraday.oneMin[keys[0]].open.ToString();
+            currentStockPrice = intraday.oneMin[keys[0]].open;
+            stockPriceLbl.Text = intraday.oneMin[keys[0]].open.ToString("C2", CultureInfo.CurrentCulture);
 
-            if (quantity.Text.Equals("0")){
-                totCostLbl.Text = "0";
-            }
-            
-
-
-
+            double tempCost = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
+            totCostLbl.Text = tempCost.ToString("C2", CultureInfo.CurrentCulture);
         }
 
-  
-
-    
-      
-
-        private void button2_Click_1(object sender, EventArgs e)
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            long temporaryVal = long.Parse(quantity.Text) * long.Parse(stockPriceLbl.Text);
-            totCostLbl.Text = (temporaryVal).ToString();
+            double tempCost = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
+            totCostLbl.Text = tempCost.ToString("C2", CultureInfo.CurrentCulture);
         }
     }
 }

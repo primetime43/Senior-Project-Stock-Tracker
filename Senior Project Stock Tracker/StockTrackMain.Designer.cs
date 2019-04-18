@@ -109,8 +109,8 @@
             // fakeStockTrainerToolStripMenuItem
             // 
             this.fakeStockTrainerToolStripMenuItem.Name = "fakeStockTrainerToolStripMenuItem";
-            this.fakeStockTrainerToolStripMenuItem.Size = new System.Drawing.Size(196, 24);
-            this.fakeStockTrainerToolStripMenuItem.Text = "Fake Stock Trainer";
+            this.fakeStockTrainerToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
+            this.fakeStockTrainerToolStripMenuItem.Text = "Fake Stock Trader";
             this.fakeStockTrainerToolStripMenuItem.Click += new System.EventHandler(this.fakeStockTrainerToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem

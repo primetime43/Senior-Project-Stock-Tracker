@@ -12,18 +12,22 @@ namespace Senior_Project_Stock_Tracker
             this.MaximizeBox = false;
             this.MinimizeBox = false;
         }
-        public static String name = "";
+        public static string name = "";
         public static long money = 0;
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBox1.Text) || string.IsNullOrEmpty(textBox2.Text))
+            if (string.IsNullOrEmpty(userNameTxtBox.Text) || string.IsNullOrEmpty(moneyAmount.Text))
             {
-                MessageBox.Show("Empty box");
+                MessageBox.Show("You must fill out both boxes!");
                 return;
             }
-            name = textBox1.Text;
-            money = long.Parse(Regex.Replace(textBox2.Text, @"^[$]|%$", string.Empty));
+
+            name = userNameTxtBox.Text;
+            money = long.Parse(Regex.Replace(moneyAmount.Text, @"^[$]|%$", string.Empty));
+
+            if (money > 1000000000)//limit set to 1 billion
+                MessageBox.Show("Max value is 1 billion, setting starting amount to max");
 
             this.Hide();
             FakeStockPurchaser frm2 = new FakeStockPurchaser();

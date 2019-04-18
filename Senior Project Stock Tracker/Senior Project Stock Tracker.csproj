@@ -90,12 +90,25 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FakeStockPurchaser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FakeStockPurchaser.Designer.cs">
+      <DependentUpon>FakeStockPurchaser.cs</DependentUpon>
+    </Compile>
     <Compile Include="News.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="News.Designer.cs">
       <DependentUpon>News.cs</DependentUpon>
     </Compile>
+    <Compile Include="NewUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewUser.designer.cs">
+      <DependentUpon>NewUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StockItem.cs" />
     <Compile Include="StockTrackMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -107,8 +120,14 @@
     <Compile Include="DataRetriever.cs">
       <SubType>Form</SubType>
     </Compile>
+    <EmbeddedResource Include="FakeStockPurchaser.resx">
+      <DependentUpon>FakeStockPurchaser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="News.resx">
       <DependentUpon>News.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewUser.resx">
+      <DependentUpon>NewUser.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="StockTrackMain.resx">
       <DependentUpon>StockTrackMain.cs</DependentUpon>

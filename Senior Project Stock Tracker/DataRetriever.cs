@@ -34,9 +34,9 @@ namespace Senior_Project_Stock_Tracker
         }
 
         //NASDAQ
-        public Dictionary<string, companyInfo> stockMarketCompanies = new Dictionary<string, companyInfo>();//key is symbol
-        public Dictionary<string, List<string>> mapSymbolToSector = new Dictionary<string, List<string>>();//contains array of sectors, each key is a sector and values are the company names in the sector
-        public Dictionary<string, List<string>> mapNameToSymbol = new Dictionary<string, List<string>>();//key is company names, and value is company's symbol (may have more than one symbol)
+        public static Dictionary<string, companyInfo> stockMarketCompanies = new Dictionary<string, companyInfo>();//key is symbol
+        public static Dictionary<string, List<string>> mapSymbolToSector = new Dictionary<string, List<string>>();//contains array of sectors, each key is a sector and values are the company names in the sector
+        public static Dictionary<string, List<string>> mapNameToSymbol = new Dictionary<string, List<string>>();//key is company names, and value is company's symbol (may have more than one symbol)
         public void loadNASDAQCompanies()//load the NASDAQ companies from the csv file
         {
             IEnumerable<companyInfo> records;

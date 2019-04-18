@@ -32,7 +32,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StockTrackMain));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.stockTrackerToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fakeStockTrainerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.downloadUpdatedCompaniesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,16 +64,16 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.addTrackCompanyButton = new System.Windows.Forms.Button();
+            this.removeTrackCompanyButton = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.addTrackCompanyButton = new System.Windows.Forms.Button();
             this.trackedCompaniesComboBox = new System.Windows.Forms.ComboBox();
-            this.removeTrackCompanyButton = new System.Windows.Forms.Button();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -100,7 +99,6 @@
             // ModeToolStripMenuItem
             // 
             this.ModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.stockTrackerToolStripMenuItem1,
             this.fakeStockTrainerToolStripMenuItem,
             this.optionsToolStripMenuItem});
             this.ModeToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -108,18 +106,12 @@
             this.ModeToolStripMenuItem.Size = new System.Drawing.Size(60, 24);
             this.ModeToolStripMenuItem.Text = "Mode";
             // 
-            // stockTrackerToolStripMenuItem1
-            // 
-            this.stockTrackerToolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.stockTrackerToolStripMenuItem1.Name = "stockTrackerToolStripMenuItem1";
-            this.stockTrackerToolStripMenuItem1.Size = new System.Drawing.Size(196, 24);
-            this.stockTrackerToolStripMenuItem1.Text = "Stock Tracker";
-            // 
             // fakeStockTrainerToolStripMenuItem
             // 
             this.fakeStockTrainerToolStripMenuItem.Name = "fakeStockTrainerToolStripMenuItem";
             this.fakeStockTrainerToolStripMenuItem.Size = new System.Drawing.Size(196, 24);
             this.fakeStockTrainerToolStripMenuItem.Text = "Fake Stock Trainer";
+            this.fakeStockTrainerToolStripMenuItem.Click += new System.EventHandler(this.fakeStockTrainerToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -480,6 +472,32 @@
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
+            // addTrackCompanyButton
+            // 
+            this.addTrackCompanyButton.BackColor = System.Drawing.Color.White;
+            this.addTrackCompanyButton.Location = new System.Drawing.Point(7, 62);
+            this.addTrackCompanyButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.addTrackCompanyButton.Name = "addTrackCompanyButton";
+            this.addTrackCompanyButton.Size = new System.Drawing.Size(124, 55);
+            this.addTrackCompanyButton.TabIndex = 18;
+            this.addTrackCompanyButton.Text = "Add Company";
+            this.toolTip1.SetToolTip(this.addTrackCompanyButton, "Add the company to track that is selected in the company listing box");
+            this.addTrackCompanyButton.UseVisualStyleBackColor = false;
+            this.addTrackCompanyButton.Click += new System.EventHandler(this.addTrackCompanyButton_Click);
+            // 
+            // removeTrackCompanyButton
+            // 
+            this.removeTrackCompanyButton.BackColor = System.Drawing.Color.White;
+            this.removeTrackCompanyButton.Location = new System.Drawing.Point(142, 62);
+            this.removeTrackCompanyButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.removeTrackCompanyButton.Name = "removeTrackCompanyButton";
+            this.removeTrackCompanyButton.Size = new System.Drawing.Size(124, 55);
+            this.removeTrackCompanyButton.TabIndex = 20;
+            this.removeTrackCompanyButton.Text = "Remove Company";
+            this.toolTip1.SetToolTip(this.removeTrackCompanyButton, "Select the company in the box above to remove the selected company from tracking");
+            this.removeTrackCompanyButton.UseVisualStyleBackColor = false;
+            this.removeTrackCompanyButton.Click += new System.EventHandler(this.removeTrackCompanyButton_Click);
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.checkBox2);
@@ -505,68 +523,6 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Tracked Stocks";
             // 
-            // groupBox5
-            // 
-            this.groupBox5.Controls.Add(this.label13);
-            this.groupBox5.Controls.Add(this.label12);
-            this.groupBox5.Controls.Add(this.label11);
-            this.groupBox5.Controls.Add(this.label1);
-            this.groupBox5.Location = new System.Drawing.Point(310, 558);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(272, 221);
-            this.groupBox5.TabIndex = 22;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Highs and Lows";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(19, 38);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(74, 18);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Daily High";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(19, 65);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(72, 18);
-            this.label11.TabIndex = 1;
-            this.label11.Text = "Daily Low";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(109, 65);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(101, 18);
-            this.label12.TabIndex = 2;
-            this.label12.Text = "52 Week High";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(109, 38);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(99, 18);
-            this.label13.TabIndex = 3;
-            this.label13.Text = "52 Week Low";
-            // 
-            // addTrackCompanyButton
-            // 
-            this.addTrackCompanyButton.BackColor = System.Drawing.Color.White;
-            this.addTrackCompanyButton.Location = new System.Drawing.Point(7, 62);
-            this.addTrackCompanyButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.addTrackCompanyButton.Name = "addTrackCompanyButton";
-            this.addTrackCompanyButton.Size = new System.Drawing.Size(124, 55);
-            this.addTrackCompanyButton.TabIndex = 18;
-            this.addTrackCompanyButton.Text = "Add Company";
-            this.toolTip1.SetToolTip(this.addTrackCompanyButton, "Add the company to track that is selected in the company listing box");
-            this.addTrackCompanyButton.UseVisualStyleBackColor = false;
-            this.addTrackCompanyButton.Click += new System.EventHandler(this.addTrackCompanyButton_Click);
-            // 
             // trackedCompaniesComboBox
             // 
             this.trackedCompaniesComboBox.BackColor = System.Drawing.Color.White;
@@ -580,18 +536,54 @@
             this.trackedCompaniesComboBox.Sorted = true;
             this.trackedCompaniesComboBox.TabIndex = 19;
             // 
-            // removeTrackCompanyButton
+            // groupBox5
             // 
-            this.removeTrackCompanyButton.BackColor = System.Drawing.Color.White;
-            this.removeTrackCompanyButton.Location = new System.Drawing.Point(142, 62);
-            this.removeTrackCompanyButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.removeTrackCompanyButton.Name = "removeTrackCompanyButton";
-            this.removeTrackCompanyButton.Size = new System.Drawing.Size(124, 55);
-            this.removeTrackCompanyButton.TabIndex = 20;
-            this.removeTrackCompanyButton.Text = "Remove Company";
-            this.toolTip1.SetToolTip(this.removeTrackCompanyButton, "Select the company in the box above to remove the selected company from tracking");
-            this.removeTrackCompanyButton.UseVisualStyleBackColor = false;
-            this.removeTrackCompanyButton.Click += new System.EventHandler(this.removeTrackCompanyButton_Click);
+            this.groupBox5.Controls.Add(this.label13);
+            this.groupBox5.Controls.Add(this.label12);
+            this.groupBox5.Controls.Add(this.label11);
+            this.groupBox5.Controls.Add(this.label1);
+            this.groupBox5.Location = new System.Drawing.Point(310, 558);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(272, 221);
+            this.groupBox5.TabIndex = 22;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Highs and Lows";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(109, 38);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(99, 18);
+            this.label13.TabIndex = 3;
+            this.label13.Text = "52 Week Low";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(109, 65);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(101, 18);
+            this.label12.TabIndex = 2;
+            this.label12.Text = "52 Week High";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(19, 65);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(72, 18);
+            this.label11.TabIndex = 1;
+            this.label11.Text = "Daily Low";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(19, 38);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(74, 18);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Daily High";
             // 
             // StockTrackMain
             // 
@@ -632,7 +624,6 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem ModeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem stockTrackerToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem fakeStockTrainerToolStripMenuItem;
         private System.Windows.Forms.Button companyNewsBtn;
         private System.Windows.Forms.Label label2;

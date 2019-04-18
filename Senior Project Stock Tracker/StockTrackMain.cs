@@ -107,7 +107,9 @@ namespace Senior_Project_Stock_Tracker
                 updateChartBtn.Enabled = false;
             else
                 updateChartBtn.Enabled = true;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             checkForMultipleSymbols(); //testing here
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private static string selectedCompany;
@@ -379,7 +381,9 @@ namespace Senior_Project_Stock_Tracker
             }
             updateDataComboBox(selectedTimeSeries);
             if (selectedCompany != null)
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 checkForMultipleSymbols();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private void timeSeriesIntervalComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series intervals
@@ -404,7 +408,9 @@ namespace Senior_Project_Stock_Tracker
                     break;
             }
             if (selectedCompany != null)
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 checkForMultipleSymbols();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         //back bone for retrieving and loading data to the chart
@@ -1047,6 +1053,21 @@ namespace Senior_Project_Stock_Tracker
             }
             File.SetAttributes(path, FileAttributes.Hidden);
             MessageBox.Show(companyToRemove + " removed");
+        }
+
+        private void fakeStockTrainerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            NewUserForm frm1 = new NewUserForm();
+            try
+            {
+                frm1.ShowDialog();
+            }
+            catch
+            {
+                MessageBox.Show("Unable to perform this action");
+            }
+            this.Show();
         }
 
         private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)

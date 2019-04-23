@@ -37,7 +37,7 @@
             this.downloadUpdatedCompaniesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stockMarketStatusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.companyNewsBtn = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.sectorsComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -118,7 +118,7 @@
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.downloadUpdatedCompaniesToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(196, 24);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(193, 24);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // downloadUpdatedCompaniesToolStripMenuItem
@@ -147,17 +147,17 @@
             this.companyNewsBtn.UseVisualStyleBackColor = false;
             this.companyNewsBtn.Click += new System.EventHandler(this.companyNewsBtn_Click);
             // 
-            // textBox1
+            // searchTextBox
             // 
-            this.textBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.textBox1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textBox1.Location = new System.Drawing.Point(10, 296);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(353, 24);
-            this.textBox1.TabIndex = 4;
-            this.toolTip1.SetToolTip(this.textBox1, "Text is case sensitive!\r\nSelect text from drop down or type it identically");
+            this.searchTextBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.searchTextBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.searchTextBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.searchTextBox.Location = new System.Drawing.Point(10, 296);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(353, 24);
+            this.searchTextBox.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.searchTextBox, "Text is case sensitive!\r\nSelect text from drop down or type it identically");
             // 
             // label2
             // 
@@ -317,7 +317,7 @@
             this.groupBox1.Controls.Add(this.desiredDataComboBox);
             this.groupBox1.Controls.Add(this.updateChartBtn);
             this.groupBox1.Controls.Add(this.label6);
-            this.groupBox1.Controls.Add(this.textBox1);
+            this.groupBox1.Controls.Add(this.searchTextBox);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.timeSeriesIntervalComboBox);
             this.groupBox1.Controls.Add(this.companyListingslistBox);
@@ -535,6 +535,7 @@
             this.trackedCompaniesComboBox.Size = new System.Drawing.Size(256, 26);
             this.trackedCompaniesComboBox.Sorted = true;
             this.trackedCompaniesComboBox.TabIndex = 19;
+            this.trackedCompaniesComboBox.SelectedIndexChanged += new System.EventHandler(this.trackedCompaniesComboBox_SelectedIndexChanged);
             // 
             // groupBox5
             // 
@@ -628,7 +629,7 @@
         private System.Windows.Forms.Button companyNewsBtn;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox sectorsComboBox;
-        public System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ListBox companyListingslistBox;
         private LiveCharts.WinForms.CartesianChart cartesianChart1;

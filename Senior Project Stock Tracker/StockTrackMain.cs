@@ -18,7 +18,6 @@ namespace Senior_Project_Stock_Tracker
     {
         public StockTrackMain()
         {
-            //testing
             InitializeComponent();
             if (!File.Exists(Directory.GetCurrentDirectory() + "\\NASDAQcompanylist.csv") || !File.Exists(Directory.GetCurrentDirectory() + "\\NYSEcompanylist.csv"))//if one of the two files don't exist, download them
             {
@@ -33,8 +32,8 @@ namespace Senior_Project_Stock_Tracker
                 File.SetAttributes("NYSEcompanylist.csv", FileAttributes.Hidden);
                 loadNASDAQCompanies();
                 loadNYSECompanies();
-                String[] myArray = mapNameToSymbol.Keys.ToArray();//testing
-                textBox1.AutoCompleteCustomSource.AddRange(myArray);//test for search
+                String[] myArray = mapNameToSymbol.Keys.ToArray();//creates this array to use in the searching for companies
+                searchTextBox.AutoCompleteCustomSource.AddRange(myArray);//for searching for companies
                 loadSectors();
                 timeSeriesComboBox.SelectedItem = "Intraday";
                 timeSeriesIntervalComboBox.SelectedItem = "1 Minute";
@@ -107,9 +106,7 @@ namespace Senior_Project_Stock_Tracker
                 updateChartBtn.Enabled = false;
             else
                 updateChartBtn.Enabled = true;
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             checkForMultipleSymbols(); //testing here
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private static string selectedCompany;
@@ -197,29 +194,180 @@ namespace Senior_Project_Stock_Tracker
             desiredData = desiredDataComboBox.SelectedItem.ToString();
         }
 
-        //methods for comparing stocks that work together start here to....
-        private void setComparedStocks()
+        private void updateDataComboBox(string selectedTimeSeries)
         {
-            //testing
-            if (!checkBox1.Checked)//not checked, keep changing company name
-                checkBox1.Text = selectedCompany;
-            else if (!checkBox2.Checked)
+            switch (selectedTimeSeries)
             {
-                checkBox2.Text = selectedCompany;
-                checkBox2.Enabled = true;
+                //add additional options for adjusted time series
+                case "TIME_SERIES_DAILY_ADJUSTED":
+                case "TIME_SERIES_WEEKLY_ADJUSTED":
+                case "TIME_SERIES_MONTHLY_ADJUSTED":
+                    if (!desiredDataComboBox.Items.Contains("Adjusted Close"))
+                    {
+                        desiredDataComboBox.Items.Add("Adjusted Close");
+                        desiredDataComboBox.Items.Add("Dividend Amount");
+                        desiredDataComboBox.Items.Add("Split Coefficient");
+                    }
+                    break;
+                //remove them when adjusted time series isn't selected
+                default:
+                    desiredDataComboBox.Items.Remove("Adjusted Close");
+                    desiredDataComboBox.Items.Remove("Dividend Amount");
+                    desiredDataComboBox.Items.Remove("Split Coefficient");
+                    break;
+
             }
         }
 
-        public class CompareStocksObj
+        //disable the time series interval combobox because the interval only applies to intraday, and is non existant in other time series json strings
+        private void timeSeriesComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series
         {
-            public string symbol { get; set; }
-            public double[] values { get; set; }
-            public string[] keys { get; set; }
+            selectedTimeSeries = timeSeriesComboBox.SelectedItem.ToString();
+            switch (selectedTimeSeries)
+            {
+                case "Intraday":
+                    selectedTimeSeries = "TIME_SERIES_INTRADAY";
+                    timeSeriesIntervalComboBox.Enabled = true;
+                    timeSeriesFlag = "Intraday";
+                    break;
+                case "Daily":
+                    selectedTimeSeries = "TIME_SERIES_DAILY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Daily";
+                    break;
+                case "Daily Adjusted":
+                    selectedTimeSeries = "TIME_SERIES_DAILY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Daily Adjusted";
+                    break;
+                case "Weekly":
+                    selectedTimeSeries = "TIME_SERIES_WEEKLY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Weekly";
+                    break;
+                case "Weekly Adjusted":
+                    selectedTimeSeries = "TIME_SERIES_WEEKLY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Weekly Adjusted";
+                    break;
+                case "Monthly":
+                    selectedTimeSeries = "TIME_SERIES_MONTHLY";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Monthly";
+                    break;
+                case "Monthly Adjusted":
+                    selectedTimeSeries = "TIME_SERIES_MONTHLY_ADJUSTED";
+                    timeSeriesIntervalComboBox.Enabled = false;
+                    timeSeriesFlag = "Monthly Adjusted";
+                    break;
+            }
+            updateDataComboBox(selectedTimeSeries);
+            if (selectedCompany != null)
+                checkForMultipleSymbols();
+        }
+
+        private void timeSeriesIntervalComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series intervals
+        {
+            selectedTimeSeriesInterval = timeSeriesIntervalComboBox.SelectedItem.ToString();
+            switch (selectedTimeSeriesInterval)
+            {
+                case "1 Minute":
+                    selectedTimeSeriesInterval = "1min";
+                    break;
+                case "5 Minutes":
+                    selectedTimeSeriesInterval = "5min";
+                    break;
+                case "15 Minutes":
+                    selectedTimeSeriesInterval = "15min";
+                    break;
+                case "30 Minutes":
+                    selectedTimeSeriesInterval = "30min";
+                    break;
+                case "60 Minutes":
+                    selectedTimeSeriesInterval = "60min";
+                    break;
+            }
+            if (selectedCompany != null)
+                checkForMultipleSymbols();
+        }
+
+        //back bone for retrieving and loading data to the chart
+        private string symbolJSONreturn = "";
+        private async void updateChartBtn_Click(object sender, EventArgs e)//for loading a single company to the chart
+        {
+            if ((!checkBox1.Checked && checkBox2.Checked) || (checkBox1.Checked && !checkBox2.Checked))//if one checkbox is checked, notify user
+            {
+                MessageBox.Show("Both check boxes must be checked to compare companies");
+                return;
+            }
+
+            cartesianChart1.Series.Clear();
+            cartesianChart1.AxisX.Clear();
+            cartesianChart1.AxisY.Clear();
+            cartesianChart1.Visible = true;
+
+            if (checkBox1.Checked && checkBox2.Checked)//both are checked, user wants to compare the two stocks
+                compareStocks();
+            else//no comparing, just load the single stock on the graph
+            {
+                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompany][0], selectedTimeSeriesInterval);
+                ExceededReq notify = new ExceededReq();
+                notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
+                if (notify != null && notify.Note != null || notify.Note == "")//for when the api notifies user must wait to make more request due to free api restrictions (bug, crashing here sometimes)
+                {
+                    MessageBox.Show(notify.Note.ToString());
+                    return;
+                }
+                else
+                    loadSingleCompanyToChart();
+            }
+        }
+
+        private void loadSingleCompanyToChart()
+        {
+            switch (timeSeriesFlag)
+            {
+                case "Intraday":
+                    RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
+                    intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
+                    loadIntradayToChart(intraday);
+                    break;
+                case "Daily":
+                    RootDaily daily = new RootDaily();//contains the daily & daily adj objs
+                    daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
+                    loadDailyToChart(daily);
+                    break;
+                case "Daily Adjusted":
+                    RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
+                    dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
+                    loadDailyToChart(dailyAdj);
+                    break;
+                case "Weekly":
+                    RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
+                    weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
+                    loadWeeklyToChart(weekly);
+                    break;
+                case "Weekly Adjusted":
+                    RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
+                    weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
+                    loadWeeklyToChart(weeklyAdj);
+                    break;
+                case "Monthly":
+                    RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
+                    monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
+                    loadMonthlyToChart(monthly);
+                    break;
+                case "Monthly Adjusted":
+                    RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
+                    monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
+                    loadMonthlyToChart(monthlyAdj);
+                    break;
+            }
         }
 
         private Boolean isComparing = false;
         public Dictionary<int, CompareStocksObj> testingComp = new Dictionary<int, CompareStocksObj>();//key is symbol 
-        private async void compareStocks()//testing for comparing stocks. Still buggy
+        private async void compareStocks()//for comparing stocks
         {
             isComparing = true;
             int numOfStocksToCompare = 0;
@@ -299,6 +447,25 @@ namespace Senior_Project_Stock_Tracker
             testingComp.Clear();
         }
 
+        private void setComparedStocks()
+        {
+            //testing
+            if (!checkBox1.Checked)//not checked, keep changing company name
+                checkBox1.Text = selectedCompany;
+            else if (!checkBox2.Checked)
+            {
+                checkBox2.Text = selectedCompany;
+                checkBox2.Enabled = true;
+            }
+        }
+
+        public class CompareStocksObj
+        {
+            public string symbol { get; set; }
+            public double[] values { get; set; }
+            public string[] keys { get; set; }
+        }
+
         private static int comparingIndex = 0;
         private void storeComparingStockData(string symbol, double[] values, string[] keys)//testStore(data.metaData.Symbol, values, keys)
         {
@@ -310,187 +477,9 @@ namespace Senior_Project_Stock_Tracker
             comparingIndex++;
         }
 
-        //....ends here here
-
-        private void updateDataComboBox(string selectedTimeSeries)
-        {
-            switch (selectedTimeSeries)
-            {
-                //add additional options for adjusted time series
-                case "TIME_SERIES_DAILY_ADJUSTED":
-                case "TIME_SERIES_WEEKLY_ADJUSTED":
-                case "TIME_SERIES_MONTHLY_ADJUSTED":
-                    if (!desiredDataComboBox.Items.Contains("Adjusted Close"))
-                    {
-                        desiredDataComboBox.Items.Add("Adjusted Close");
-                        desiredDataComboBox.Items.Add("Dividend Amount");
-                        desiredDataComboBox.Items.Add("Split Coefficient");
-                    }
-                    break;
-                //remove them when adjusted time series isn't selected
-                default:
-                    desiredDataComboBox.Items.Remove("Adjusted Close");
-                    desiredDataComboBox.Items.Remove("Dividend Amount");
-                    desiredDataComboBox.Items.Remove("Split Coefficient");
-                    break;
-
-            }
-        }
-
-        //disable the time series interval combobox because the interval only applies to intraday, and is non existant in other time series json strings
-        private void timeSeriesComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series
-        {
-            selectedTimeSeries = timeSeriesComboBox.SelectedItem.ToString();
-            switch (selectedTimeSeries)
-            {
-                case "Intraday":
-                    selectedTimeSeries = "TIME_SERIES_INTRADAY";
-                    timeSeriesIntervalComboBox.Enabled = true;
-                    timeSeriesFlag = "Intraday";
-                    break;
-                case "Daily":
-                    selectedTimeSeries = "TIME_SERIES_DAILY";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Daily";
-                    break;
-                case "Daily Adjusted":
-                    selectedTimeSeries = "TIME_SERIES_DAILY_ADJUSTED";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Daily Adjusted";
-                    break;
-                case "Weekly":
-                    selectedTimeSeries = "TIME_SERIES_WEEKLY";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Weekly";
-                    break;
-                case "Weekly Adjusted":
-                    selectedTimeSeries = "TIME_SERIES_WEEKLY_ADJUSTED";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Weekly Adjusted";
-                    break;
-                case "Monthly":
-                    selectedTimeSeries = "TIME_SERIES_MONTHLY";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Monthly";
-                    break;
-                case "Monthly Adjusted":
-                    selectedTimeSeries = "TIME_SERIES_MONTHLY_ADJUSTED";
-                    timeSeriesIntervalComboBox.Enabled = false;
-                    timeSeriesFlag = "Monthly Adjusted";
-                    break;
-            }
-            updateDataComboBox(selectedTimeSeries);
-            if (selectedCompany != null)
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                checkForMultipleSymbols();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        }
-
-        private void timeSeriesIntervalComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series intervals
-        {
-            selectedTimeSeriesInterval = timeSeriesIntervalComboBox.SelectedItem.ToString();
-            switch (selectedTimeSeriesInterval)
-            {
-                case "1 Minute":
-                    selectedTimeSeriesInterval = "1min";
-                    break;
-                case "5 Minutes":
-                    selectedTimeSeriesInterval = "5min";
-                    break;
-                case "15 Minutes":
-                    selectedTimeSeriesInterval = "15min";
-                    break;
-                case "30 Minutes":
-                    selectedTimeSeriesInterval = "30min";
-                    break;
-                case "60 Minutes":
-                    selectedTimeSeriesInterval = "60min";
-                    break;
-            }
-            if (selectedCompany != null)
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                checkForMultipleSymbols();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        }
-
-        //back bone for retrieving and loading data to the chart
-        private string symbolJSONreturn = "";
-        private async void updateChartBtn_Click(object sender, EventArgs e)//testing the async
-        {
-            if ((!checkBox1.Checked && checkBox2.Checked) || (checkBox1.Checked && !checkBox2.Checked))//if one checkbox is checked, notify user
-            {
-                MessageBox.Show("Both check boxes must be checked to compare companies");
-                return;
-            }
-
-            cartesianChart1.Series.Clear();
-            cartesianChart1.AxisX.Clear();
-            cartesianChart1.AxisY.Clear();
-            cartesianChart1.Visible = true;
-
-            //await checkForMultipleSymbols();//testing
-
-            if (checkBox1.Checked && checkBox2.Checked)//both are checked, user wants to compare the two stocks
-                compareStocks();
-            else//no comparing, just load the single stock on the graph
-            {
-                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompany][0], selectedTimeSeriesInterval);
-                //testing from here
-                ExceededReq notify = new ExceededReq();
-                notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
-                if (notify != null && notify.Note != null || notify.Note == "")//for when the api notifies user must wait to make more request due to free api restrictions (bug, crashing here sometimes)
-                {
-                    MessageBox.Show(notify.Note.ToString());
-                    return;
-                }
-                //to here
-                else
-                {
-                    switch (timeSeriesFlag)
-                    {
-                        case "Intraday":
-                            RootIntraday intraday = new RootIntraday();//contains the 1,5,15,30,60 min objs
-                            intraday = JsonConvert.DeserializeObject<RootIntraday>(symbolJSONreturn);
-                            loadIntradayToChart(intraday);
-                            break;
-                        case "Daily":
-                            RootDaily daily = new RootDaily();//contains the daily & daily adj objs
-                            daily = JsonConvert.DeserializeObject<RootDaily>(symbolJSONreturn);
-                            loadDailyToChart(daily);
-                            break;
-                        case "Daily Adjusted":
-                            RootDailyAdj dailyAdj = new RootDailyAdj();//contains the daily & daily adj objs
-                            dailyAdj = JsonConvert.DeserializeObject<RootDailyAdj>(symbolJSONreturn);
-                            loadDailyToChart(dailyAdj);
-                            break;
-                        case "Weekly":
-                            RootWeekly weekly = new RootWeekly();//contains the weekly & weekly adj objs
-                            weekly = JsonConvert.DeserializeObject<RootWeekly>(symbolJSONreturn);
-                            loadWeeklyToChart(weekly);
-                            break;
-                        case "Weekly Adjusted":
-                            RootWeeklyAdj weeklyAdj = new RootWeeklyAdj();//contains the weekly & weekly adj objs
-                            weeklyAdj = JsonConvert.DeserializeObject<RootWeeklyAdj>(symbolJSONreturn);
-                            loadWeeklyToChart(weeklyAdj);
-                            break;
-                        case "Monthly":
-                            RootMonthly monthly = new RootMonthly();//contains the monthly & monthly adj objs
-                            monthly = JsonConvert.DeserializeObject<RootMonthly>(symbolJSONreturn);
-                            loadMonthlyToChart(monthly);
-                            break;
-                        case "Monthly Adjusted":
-                            RootMonthlyAdj monthlyAdj = new RootMonthlyAdj();//contains the monthly & monthly adj objs
-                            monthlyAdj = JsonConvert.DeserializeObject<RootMonthlyAdj>(symbolJSONreturn);
-                            loadMonthlyToChart(monthlyAdj);
-                            break;
-                    }
-                }
-            }
-        }
-
         private static Boolean isVolume = false;
         //Intraday daily data
-        private void loadIntradayToChart(RootIntraday data)//seems to have some bugs, need to fix; it shows index on chart points, instead of date/time (only happens on intraday)
+        private void loadIntradayToChart(RootIntraday data)//seems to have some bugs, need to fix; it shows index on chart points, instead of date/time (works for 60 min but nothing below)
         {
             string[] keys = null;
             double[] values = null;
@@ -804,11 +793,11 @@ namespace Senior_Project_Stock_Tracker
 
         private void buttonLocateCompany_Click(object sender, EventArgs e)
         {
-            if (mapNameToSymbol.ContainsKey(textBox1.Text))
+            if (mapNameToSymbol.ContainsKey(searchTextBox.Text))
             {
-                selectedCompany = textBox1.Text;
+                selectedCompany = searchTextBox.Text;
                 sectorsComboBox.SelectedItem = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].Sector;
-                companyListingslistBox.SelectedItem = textBox1.Text;
+                companyListingslistBox.SelectedItem = searchTextBox.Text;
                 displayAdditionalInfo();
                 companyListingslistBox.Focus();
             }
@@ -885,17 +874,7 @@ namespace Senior_Project_Stock_Tracker
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
-        {//intraday dates need fixed (works for 60 min but not anything down from there)
-            /*cartesianChart1.Series = new SeriesCollection
-            {
-                //lines and their values
-                new LineSeries
-                {
-                    Title = selectedCompany + " (" + symbol + ")",
-                    Values = new ChartValues<double> (values)
-                }
-            };*/
-
+        {//intraday dates need fixed (dates show correctly for some companies, but others it doesn't even when the keys are same)
             cartesianChart1.Series.Add(new LineSeries
             {
                 Title = selectedCompany + " (" + symbol + ")",
@@ -930,11 +909,20 @@ namespace Senior_Project_Stock_Tracker
             isVolume = false;
         }
 
-        private void loadDataToChartComparing()//layout needs fixed. Axis and data labels are using array indexes instead of dates for some reason
+        private void loadDataToChartComparing()//Axis and data labels are using array indexes instead of dates for some reason (same as above for intraday. Works for daily tho)
         {
-            string[] keys1 = testingComp[0].keys;//can do this because same time frame means they'll have the same dates. (not sure about months though)
+
+            string[] keys1 = testingComp[0].keys;
             string[] keys2 = testingComp[1].keys;
-            Console.WriteLine("Keys: " + keys1);
+            /*foreach (var item in keys1)
+            {
+                Console.WriteLine("Keys1: " + item.ToString());
+            }
+            foreach (var item in keys2)
+            {
+                Console.WriteLine("Keys2: " + item.ToString());
+            }*/
+
             cartesianChart1.Series.Add(new LineSeries
             {
                 Title = stockMarketCompanies[testingComp[0].symbol].Name + " (" + testingComp[0].symbol + ")",
@@ -946,35 +934,32 @@ namespace Senior_Project_Stock_Tracker
                 Title = stockMarketCompanies[testingComp[1].symbol].Name + " (" + testingComp[1].symbol + ")",
                 Values = new ChartValues<double>(testingComp[1].values),
             });
-
-            /*cartesianChart1.Series = new SeriesCollection
+            //I believe the problem is that its too much data (month is less), so its unable to show all the keys
+            if (keys1.Length > keys2.Length)//works with months but not others
             {
-                //lines and their values
-                new LineSeries
+                cartesianChart1.AxisX.Add(new Axis
                 {
-                    Title = stockMarketCompanies[testingComp[0].symbol].Name + " (" + testingComp[0].symbol + ")",
-                    Values = new ChartValues<double> (testingComp[0].values),
-                },
-                new LineSeries
+                    Labels = keys1,
+                });
+            }
+            else
+            {
+                cartesianChart1.AxisX.Add(new Axis
                 {
-                    Title = stockMarketCompanies[testingComp[1].symbol].Name + " (" + testingComp[1].symbol + ")",
-                    Values = new ChartValues<double> (testingComp[1].values),
-                }
-            };*/
-
+                    Labels = keys2,
+                });
+            }
             //bottom x axis labels
-            cartesianChart1.AxisX.Add(new Axis
-            {
-                //Title = stockMarketCompanies[testingComp[0].symbol].Name + " Axis",
-                Labels = keys1,
-            });
-
-
             /*cartesianChart1.AxisX.Add(new Axis
             {
+                Title = stockMarketCompanies[testingComp[0].symbol].Name + " Axis",
+                //Labels = keys1,
+            });
+
+            cartesianChart1.AxisX.Add(new Axis
+            {
                 Title = stockMarketCompanies[testingComp[1].symbol].Name + " Axis",
-                Labels = keys2,
-                //Position = AxisPosition.RightTop
+                //Labels = keys2,
             });*/
 
             if (isVolume)
@@ -985,7 +970,7 @@ namespace Senior_Project_Stock_Tracker
                     LabelFormatter = values => values.ToString("C")
                 });
             }
-            else
+            /*else
             {//left side y axis labels
                 cartesianChart1.AxisY.Add(new Axis
                 {
@@ -998,7 +983,7 @@ namespace Senior_Project_Stock_Tracker
                     Title = stockMarketCompanies[testingComp[1].symbol].Name + " Values",
                     LabelFormatter = values => values.ToString("C"),
                 });
-            }
+            }*/
             //right side legend
             cartesianChart1.LegendLocation = LegendLocation.Bottom;
             isVolume = false;
@@ -1069,6 +1054,21 @@ namespace Senior_Project_Stock_Tracker
             this.Show();
         }
 
+        private void trackedCompaniesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selected = trackedCompaniesComboBox.GetItemText(trackedCompaniesComboBox.SelectedItem);
+            if (mapNameToSymbol.ContainsKey(selected))
+            {
+                selectedCompany = selected;
+                sectorsComboBox.SelectedItem = stockMarketCompanies[mapNameToSymbol[selectedCompany][0]].Sector;
+                companyListingslistBox.SelectedItem = selected;
+                displayAdditionalInfo();
+                companyListingslistBox.Focus();
+            }
+            else
+                MessageBox.Show("Unable to locate company!");
+        }
+
         private void downloadUpdatedCompaniesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             downloadRequiredFiles();
@@ -1107,10 +1107,8 @@ namespace Senior_Project_Stock_Tracker
 /*
  * TODO:
  * add ability to compare stocks on chart (needs fixed)
- * add option to track stocks
- * maybe add option to show different types of charts
- * add daily high & low and 52 weeks high & low
+ * add daily high & low and 52 weeks high & low (not sure where to get this data from, may scratch idea)
  * */
 
-//cant do compare 3 stocks because api limits due to number of requests at once
 //super weird bug having to do with searching a company then trying to display chart without focusing on another object on form. Doesn't seem to occur always.
+//there is a bug where if while trying to compare stocks and an api limit is reached, it will lose the second companying being compared and will compare the first company to itself. Can be fixed by unchecking and rechecking company box two

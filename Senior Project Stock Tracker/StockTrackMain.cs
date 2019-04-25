@@ -101,7 +101,7 @@ namespace Senior_Project_Stock_Tracker
 
         private static Boolean flag = true;
         private void companyListingslistBox_SelectedIndexChanged(object sender, EventArgs e)//load the companies into the listbox
-        {//need to fix it to not called api data from this, only from display chart button
+        {
             if (companyListingslistBox.SelectedIndex == -1)//no item selected
                 updateChartBtn.Enabled = false;
             else
@@ -479,7 +479,7 @@ namespace Senior_Project_Stock_Tracker
 
         private static Boolean isVolume = false;
         //Intraday daily data
-        private void loadIntradayToChart(RootIntraday data)//seems to have some bugs, need to fix; it shows index on chart points, instead of date/time (works for 60 min but nothing below)
+        private void loadIntradayToChart(RootIntraday data)
         {
             string[] keys = null;
             double[] values = null;
@@ -609,7 +609,7 @@ namespace Senior_Project_Stock_Tracker
         }
 
         //normal daily data
-        private void loadDailyToChart(RootDaily data)//testing with this here for comparison
+        private void loadDailyToChart(RootDaily data)
         {
             string[] keys = data.data.Keys.ToArray();
             double[] values = new double[data.data.Keys.Count];
@@ -874,12 +874,17 @@ namespace Senior_Project_Stock_Tracker
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
-        {//intraday dates need fixed (dates show correctly for some companies, but others it doesn't even when the keys are same)
+        {//the bug is the user must reselect the time series again or else the dates will not show (user must select new items in combobox to fix the bug.)
             cartesianChart1.Series.Add(new LineSeries
             {
                 Title = selectedCompany + " (" + symbol + ")",
-                Values = new ChartValues<double>(values)
+                Values = new ChartValues<double>(values),
             });
+
+            foreach (var item in keys)
+            {
+                Console.WriteLine("Keys: " + item.ToString());
+            }
 
             //bottom x axis labels
             cartesianChart1.AxisX.Add(new Axis
@@ -888,7 +893,7 @@ namespace Senior_Project_Stock_Tracker
                 Labels = keys
             });
 
-            if (isVolume)
+            /*if (isVolume)
             {
                 cartesianChart1.AxisY.Add(new Axis
                 {
@@ -903,7 +908,7 @@ namespace Senior_Project_Stock_Tracker
                     Title = "Values",
                     LabelFormatter = value => value.ToString("C")
                 });
-            }
+            }*/
             //right side legend
             cartesianChart1.LegendLocation = LegendLocation.Bottom;
             isVolume = false;
@@ -962,7 +967,7 @@ namespace Senior_Project_Stock_Tracker
                 //Labels = keys2,
             });*/
 
-            if (isVolume)
+            /*if (isVolume)
             {
                 cartesianChart1.AxisY.Add(new Axis
                 {
@@ -970,7 +975,7 @@ namespace Senior_Project_Stock_Tracker
                     LabelFormatter = values => values.ToString("C")
                 });
             }
-            /*else
+            else
             {//left side y axis labels
                 cartesianChart1.AxisY.Add(new Axis
                 {

@@ -29,11 +29,9 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.portfolioValLbl = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.currentCashLbl = new System.Windows.Forms.Label();
+            this.availFunds = new System.Windows.Forms.Label();
+            this.strCash = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.strCashLbl = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -63,19 +61,27 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.stockOwnedListBox = new System.Windows.Forms.ListBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.totalSoldValLbl = new System.Windows.Forms.Label();
+            this.soldPriceLbl = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.quantityStockSell = new System.Windows.Forms.NumericUpDown();
+            this.sellStock = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.quantityStockSell)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.portfolioValLbl);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.currentCashLbl);
+            this.groupBox1.Controls.Add(this.availFunds);
+            this.groupBox1.Controls.Add(this.strCash);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.strCashLbl);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(18, 17);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
@@ -86,36 +92,23 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
             // 
-            // portfolioValLbl
+            // availFunds
             // 
-            this.portfolioValLbl.AutoSize = true;
-            this.portfolioValLbl.Location = new System.Drawing.Point(483, 22);
-            this.portfolioValLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.portfolioValLbl.Name = "portfolioValLbl";
-            this.portfolioValLbl.Size = new System.Drawing.Size(101, 18);
-            this.portfolioValLbl.TabIndex = 5;
-            this.portfolioValLbl.Text = "portfolioValLbl";
+            this.availFunds.AutoSize = true;
+            this.availFunds.Location = new System.Drawing.Point(131, 54);
+            this.availFunds.Name = "availFunds";
+            this.availFunds.Size = new System.Drawing.Size(78, 18);
+            this.availFunds.TabIndex = 9;
+            this.availFunds.Text = "availFunds";
             // 
-            // label3
+            // strCash
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(348, 22);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(108, 18);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Portfolio Value:";
-            // 
-            // currentCashLbl
-            // 
-            this.currentCashLbl.AutoSize = true;
-            this.currentCashLbl.Location = new System.Drawing.Point(128, 54);
-            this.currentCashLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.currentCashLbl.Name = "currentCashLbl";
-            this.currentCashLbl.Size = new System.Drawing.Size(108, 18);
-            this.currentCashLbl.TabIndex = 3;
-            this.currentCashLbl.Text = "currentCashLbl";
-            this.currentCashLbl.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.strCash.AutoSize = true;
+            this.strCash.Location = new System.Drawing.Point(131, 22);
+            this.strCash.Name = "strCash";
+            this.strCash.Size = new System.Drawing.Size(60, 18);
+            this.strCash.TabIndex = 8;
+            this.strCash.Text = "strCash";
             // 
             // label2
             // 
@@ -126,16 +119,6 @@
             this.label2.Size = new System.Drawing.Size(114, 18);
             this.label2.TabIndex = 2;
             this.label2.Text = "Available Funds:";
-            // 
-            // strCashLbl
-            // 
-            this.strCashLbl.AutoSize = true;
-            this.strCashLbl.Location = new System.Drawing.Point(128, 22);
-            this.strCashLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.strCashLbl.Name = "strCashLbl";
-            this.strCashLbl.Size = new System.Drawing.Size(79, 18);
-            this.strCashLbl.TabIndex = 1;
-            this.strCashLbl.Text = "strCashLbl";
             // 
             // label1
             // 
@@ -217,24 +200,26 @@
             // 
             // buyBtn
             // 
+            this.buyBtn.BackColor = System.Drawing.Color.White;
             this.buyBtn.Location = new System.Drawing.Point(290, 303);
             this.buyBtn.Margin = new System.Windows.Forms.Padding(4);
             this.buyBtn.Name = "buyBtn";
             this.buyBtn.Size = new System.Drawing.Size(198, 68);
             this.buyBtn.TabIndex = 1;
             this.buyBtn.Text = "Purhase Stock";
-            this.buyBtn.UseVisualStyleBackColor = true;
+            this.buyBtn.UseVisualStyleBackColor = false;
             this.buyBtn.Click += new System.EventHandler(this.buyBtn_Click);
             // 
             // button1
             // 
+            this.button1.BackColor = System.Drawing.Color.White;
             this.button1.Location = new System.Drawing.Point(321, 38);
             this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(150, 35);
             this.button1.TabIndex = 13;
             this.button1.Text = "Locate Company";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // searchTxtBox
@@ -256,6 +241,7 @@
             this.stockSymbolLbl.Size = new System.Drawing.Size(114, 18);
             this.stockSymbolLbl.TabIndex = 11;
             this.stockSymbolLbl.Text = "stockSymbolLbl";
+            this.stockSymbolLbl.Visible = false;
             // 
             // stockPriceLbl
             // 
@@ -266,6 +252,7 @@
             this.stockPriceLbl.Size = new System.Drawing.Size(98, 18);
             this.stockPriceLbl.TabIndex = 10;
             this.stockPriceLbl.Text = "stockPriceLbl";
+            this.stockPriceLbl.Visible = false;
             // 
             // label13
             // 
@@ -307,6 +294,7 @@
             this.totCostLbl.TabIndex = 5;
             this.totCostLbl.Text = "totCostLbl";
             this.totCostLbl.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.totCostLbl.Visible = false;
             // 
             // label5
             // 
@@ -351,6 +339,7 @@
             this.gainLossLbl.Size = new System.Drawing.Size(87, 18);
             this.gainLossLbl.TabIndex = 18;
             this.gainLossLbl.Text = "gainLossLbl";
+            this.gainLossLbl.Visible = false;
             // 
             // currValLbl
             // 
@@ -361,6 +350,7 @@
             this.currValLbl.Size = new System.Drawing.Size(93, 18);
             this.currValLbl.TabIndex = 17;
             this.currValLbl.Text = "currentValLbl";
+            this.currValLbl.Visible = false;
             // 
             // initialValLbl
             // 
@@ -371,6 +361,7 @@
             this.initialValLbl.Size = new System.Drawing.Size(79, 18);
             this.initialValLbl.TabIndex = 16;
             this.initialValLbl.Text = "initialValLbl";
+            this.initialValLbl.Visible = false;
             // 
             // curPriceLbl
             // 
@@ -381,6 +372,7 @@
             this.curPriceLbl.Size = new System.Drawing.Size(107, 18);
             this.curPriceLbl.TabIndex = 15;
             this.curPriceLbl.Text = "currentPriceLbl";
+            this.curPriceLbl.Visible = false;
             // 
             // purchasePriceLbl
             // 
@@ -391,6 +383,7 @@
             this.purchasePriceLbl.Size = new System.Drawing.Size(122, 18);
             this.purchasePriceLbl.TabIndex = 14;
             this.purchasePriceLbl.Text = "purchasePriceLbl";
+            this.purchasePriceLbl.Visible = false;
             // 
             // quantOwnLbl
             // 
@@ -401,6 +394,7 @@
             this.quantOwnLbl.Size = new System.Drawing.Size(94, 18);
             this.quantOwnLbl.TabIndex = 13;
             this.quantOwnLbl.Text = "quantOwnLbl";
+            this.quantOwnLbl.Visible = false;
             // 
             // label11
             // 
@@ -473,18 +467,106 @@
             this.stockOwnedListBox.TabIndex = 0;
             this.stockOwnedListBox.SelectedIndexChanged += new System.EventHandler(this.stockOwnedListBox_SelectedIndexChanged);
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.totalSoldValLbl);
+            this.groupBox4.Controls.Add(this.soldPriceLbl);
+            this.groupBox4.Controls.Add(this.label17);
+            this.groupBox4.Controls.Add(this.label16);
+            this.groupBox4.Controls.Add(this.label15);
+            this.groupBox4.Controls.Add(this.quantityStockSell);
+            this.groupBox4.Controls.Add(this.sellStock);
+            this.groupBox4.Location = new System.Drawing.Point(559, 409);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(414, 100);
+            this.groupBox4.TabIndex = 4;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Sell Stock";
+            // 
+            // totalSoldValLbl
+            // 
+            this.totalSoldValLbl.AutoSize = true;
+            this.totalSoldValLbl.Location = new System.Drawing.Point(121, 45);
+            this.totalSoldValLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.totalSoldValLbl.Name = "totalSoldValLbl";
+            this.totalSoldValLbl.Size = new System.Drawing.Size(105, 18);
+            this.totalSoldValLbl.TabIndex = 18;
+            this.totalSoldValLbl.Text = "totalSoldValLbl";
+            this.totalSoldValLbl.Visible = false;
+            // 
+            // soldPriceLbl
+            // 
+            this.soldPriceLbl.AutoSize = true;
+            this.soldPriceLbl.Location = new System.Drawing.Point(137, 20);
+            this.soldPriceLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.soldPriceLbl.Name = "soldPriceLbl";
+            this.soldPriceLbl.Size = new System.Drawing.Size(89, 18);
+            this.soldPriceLbl.TabIndex = 19;
+            this.soldPriceLbl.Text = "soldPriceLbl";
+            this.soldPriceLbl.Visible = false;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(24, 45);
+            this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(85, 18);
+            this.label17.TabIndex = 18;
+            this.label17.Text = "Total Value:";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(20, 20);
+            this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(99, 18);
+            this.label16.TabIndex = 18;
+            this.label16.Text = "Current Price:";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(20, 72);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(117, 18);
+            this.label15.TabIndex = 18;
+            this.label15.Text = "Shares Quantity:";
+            // 
+            // quantityStockSell
+            // 
+            this.quantityStockSell.Location = new System.Drawing.Point(140, 70);
+            this.quantityStockSell.Name = "quantityStockSell";
+            this.quantityStockSell.Size = new System.Drawing.Size(95, 24);
+            this.quantityStockSell.TabIndex = 1;
+            this.quantityStockSell.ValueChanged += new System.EventHandler(this.quantityStockSell_ValueChanged);
+            // 
+            // sellStock
+            // 
+            this.sellStock.BackColor = System.Drawing.Color.White;
+            this.sellStock.Location = new System.Drawing.Point(241, 14);
+            this.sellStock.Name = "sellStock";
+            this.sellStock.Size = new System.Drawing.Size(165, 80);
+            this.sellStock.TabIndex = 0;
+            this.sellStock.Text = "Sell Stock";
+            this.sellStock.UseVisualStyleBackColor = false;
+            this.sellStock.Click += new System.EventHandler(this.sellStock_Click);
+            // 
             // FakeStockPurchaser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(996, 525);
+            this.ClientSize = new System.Drawing.Size(990, 523);
+            this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "FakeStockPurchaser";
-            this.Text = "Form1";
+            this.Text = "Fake Stock Trader";
             this.Load += new System.EventHandler(this.FakeStockPurchaser_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -493,6 +575,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.quantityStockSell)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -500,12 +585,8 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label strCashLbl;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label currentCashLbl;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label portfolioValLbl;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ListBox stockOwnedListBox;
@@ -534,5 +615,15 @@
         private System.Windows.Forms.ListBox companiesListBox;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Label availFunds;
+        private System.Windows.Forms.Label strCash;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label totalSoldValLbl;
+        private System.Windows.Forms.Label soldPriceLbl;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.NumericUpDown quantityStockSell;
+        private System.Windows.Forms.Button sellStock;
     }
 }

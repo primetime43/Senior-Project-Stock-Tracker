@@ -13,7 +13,7 @@ namespace Senior_Project_Stock_Tracker
     public partial class FakeStockPurchaser : DataRetriever
     {
         private SQLiteConnection m_dbConnection;
-        private string sql = "create table userDatabase (transID text, name text, companyName text, stockSymbol text, quantityPurchased long, purchasePrice text, totalCost text, purchaseDate text, startingMoney text, availableFunds text)";
+        private string sql = "create table userDatabase (transID text, name text, companyName text, stockSymbol text, quantityPurchased long, purchasePrice text, totalCost text, lastTransDate text, startingMoney text, availableFunds text)";
         public FakeStockPurchaser()
         {
             InitializeComponent();
@@ -73,7 +73,7 @@ namespace Senior_Project_Stock_Tracker
             StockItem current = new StockItem();
             current.name = nameOfSelectedCompany;
             current.symbol = stockSymbolLbl.Text;
-            current.purchasePrice = intraday.oneMin[keys[0]].open;//crashing here
+            current.purchasePrice = intraday.oneMin[keys[0]].open;
             current.quantity = Convert.ToInt32(numericUpDown1.Value);
             current.value = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
             currentStockVal += (Convert.ToInt32(numericUpDown1.Value) * currentStockPrice);
@@ -94,7 +94,7 @@ namespace Senior_Project_Stock_Tracker
             string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
             double totalCost = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
 
-            sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, purchaseDate, startingMoney, availableFunds) values (" + idTest + ",'" + NewUserForm.name + "','" + nameOfSelectedCompany + "','" + stockSymbolLbl.Text + "'," + Convert.ToInt32(numericUpDown1.Value) + ",'" + purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + totalCost.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + currentCash.ToString("C2", CultureInfo.CurrentCulture) + "')";
+            sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds) values (" + idTest + ",'" + NewUserForm.name + "','" + nameOfSelectedCompany + "','" + stockSymbolLbl.Text + "'," + Convert.ToInt32(numericUpDown1.Value) + ",'" + purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + totalCost.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + currentCash.ToString("C2", CultureInfo.CurrentCulture) + "')";
 
             command = new SQLiteCommand(sql, m_dbConnection);
             command.ExecuteNonQuery();
@@ -216,14 +216,14 @@ namespace Senior_Project_Stock_Tracker
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
 
             SQLiteDataReader reader = command.ExecuteReader();
-            String startCash = "";
-            String availableCash = "";
-            String name = "";
+            string startCash = "";
+            string availableCash = "";
+            string name = "";
 
             while (reader.Read())
             {
 
-                Console.WriteLine("transID: " + reader["transID"] + " name: " + reader["name"] + " companyName: " + reader["companyName"] + " stockSymbol: " + reader["stockSymbol"] + " quantityPurchased: " + reader["quantityPurchased"] + " purchasePrice: " + reader["purchasePrice"] + " totalCost: " + reader["totalCost"] + " purchaseDate: " + reader["purchaseDate"] + " startingMoney: " + reader["startingMoney"] + " availableFunds: " + reader["availableFunds"]);
+                Console.WriteLine("transID: " + reader["transID"] + " name: " + reader["name"] + " companyName: " + reader["companyName"] + " stockSymbol: " + reader["stockSymbol"] + " quantityPurchased: " + reader["quantityPurchased"] + " purchasePrice: " + reader["purchasePrice"] + " totalCost: " + reader["totalCost"] + " lastTransDate: " + reader["lastTransDate"] + " startingMoney: " + reader["startingMoney"] + " availableFunds: " + reader["availableFunds"]);
 
                 StockItem current = new StockItem();
                 name = reader["name"].ToString();
@@ -246,17 +246,26 @@ namespace Senior_Project_Stock_Tracker
             groupBox1.Text = name;
             strCash.Text = startCash.ToString();
             availFunds.Text = availableCash.ToString();
-            Console.WriteLine(strCash.Text + ":" + availFunds.Text);
-            Console.WriteLine(startCash + ":" + availableCash);
 
+            m_dbConnection.Close();
+
+            //testing for deleting records after reading them all in
+            m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
+            m_dbConnection.Open();
+
+            sql = "delete from userDatabase";
+
+            command = new SQLiteCommand(sql, m_dbConnection);
+            command.ExecuteNonQuery();
             m_dbConnection.Close();
         }
 
         private void sellStock_Click(object sender, EventArgs e)
         {
-
-            String companyNameSell = stockOwnedListBox.SelectedItem.ToString();
-            String key = mapNameToSymbol[companyNameSell][0];
+            m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
+            m_dbConnection.Open();
+            string companyNameSell = stockOwnedListBox.SelectedItem.ToString();
+            string key = mapNameToSymbol[companyNameSell][0];
 
             StockItem updatedStock = new StockItem();
             StockItem oldStock = stocksOwned[key];
@@ -292,6 +301,20 @@ namespace Senior_Project_Stock_Tracker
                 }
             }
             this.Refresh();
+            
+            //testing for updating DB file after selling
+            string todaysDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+
+            //sql stuff below here testing
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
+            double totalCost = Convert.ToInt32(quantityStockSell.Value) * oldStock.purchasePrice;//need to subtract the value of say 1 stock from value of totalCost of 3 so you get the value of only 2, should be same price when purchased
+
+            sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds) values (" + idTest + ",'" + NewUserForm.name + "','" + updatedStock.name + "','" + stockSymbolLbl.Text + "'," + Convert.ToInt32(numericUpDown1.Value) + ",'" + oldStock.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + totalCost.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + currentCash.ToString("C2", CultureInfo.CurrentCulture) + "')";
+
+            command = new SQLiteCommand(sql, m_dbConnection);
+            command.ExecuteNonQuery();
+            m_dbConnection.Close();
         }
 
         private void quantityStockSell_ValueChanged(object sender, EventArgs e)

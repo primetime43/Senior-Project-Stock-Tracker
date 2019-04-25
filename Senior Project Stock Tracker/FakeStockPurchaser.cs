@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Globalization;
 using System.Data.SQLite;
-using System.IO;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
@@ -30,12 +29,13 @@ namespace Senior_Project_Stock_Tracker
         public static double currentCash;
         public static double currentStockVal;
         private static string companyName;
-
+        public static string userName;
         Dictionary<string, StockItem> stocksOwned = new Dictionary<string, StockItem>();
         private void FakeStockPurchaser_Load(object sender, EventArgs e)
         {
             if (NewUserForm.newUser)
             {
+                userName = NewUserForm.name;
                 groupBox1.Text = NewUserForm.name + "'s Wallet";
                 strCash.Text = NewUserForm.money.ToString("C2", CultureInfo.CurrentCulture);
                 availFunds.Text = NewUserForm.money.ToString("C2", CultureInfo.CurrentCulture);
@@ -116,7 +116,6 @@ namespace Senior_Project_Stock_Tracker
 
 
                     string symbolJSONreturn = await retrieveSymbolData("TIME_SERIES_INTRADAY", mapNameToSymbol[companyName][0], "1min");
-
                     ExceededReq notify = new ExceededReq();
                     notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
                     if (notify != null && notify.Note != null || notify.Note == "")
@@ -137,6 +136,7 @@ namespace Senior_Project_Stock_Tracker
                     soldPriceLbl.Text = curPriceLbl.Text;
                     initialValLbl.Text = stocksOwned[key].value.ToString("C2", CultureInfo.CurrentCulture);
                     gainLossLbl.Text = (stocksOwned[key].value - (stocksOwned[key].quantity * intraday.oneMin[keys[0]].open)).ToString("C2", CultureInfo.CurrentCulture);
+                    totalSoldValLbl.Text = soldPriceLbl.Text;
                 }
                 else
                     MessageBox.Show("Error");
@@ -149,6 +149,7 @@ namespace Senior_Project_Stock_Tracker
             currValLbl.Visible = true;
             gainLossLbl.Visible = true;
             soldPriceLbl.Visible = true;
+            totalSoldValLbl.Visible = true;
         }
 
         private static double currentStockPrice;
@@ -180,6 +181,7 @@ namespace Senior_Project_Stock_Tracker
             keys = intraday.oneMin.Keys.ToArray();
             currentStockPrice = intraday.oneMin[keys[0]].open;
             stockPriceLbl.Text = intraday.oneMin[keys[0]].open.ToString("C2", CultureInfo.CurrentCulture);
+
 
             double tempCost = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
             totCostLbl.Text = tempCost.ToString("C2", CultureInfo.CurrentCulture);
@@ -250,6 +252,7 @@ namespace Senior_Project_Stock_Tracker
             strCash.ResetText();
             availFunds.ResetText();
 
+            userName = NewUserForm.existingUserFileName.Substring(0, NewUserForm.existingUserFileName.IndexOf('_'));
             groupBox1.Text = NewUserForm.existingUserFileName.Substring(0, NewUserForm.existingUserFileName.IndexOf('_')) + "'s Wallet";
             strCash.Text = startCash.ToString();
             availFunds.Text = availableCash.ToString();
@@ -269,8 +272,7 @@ namespace Senior_Project_Stock_Tracker
 
         private void sellStock_Click(object sender, EventArgs e)
         {
-            m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
-            m_dbConnection.Open();
+
             string companyNameSell = stockOwnedListBox.SelectedItem.ToString();
             string key = mapNameToSymbol[companyNameSell][0];
 
@@ -284,53 +286,40 @@ namespace Senior_Project_Stock_Tracker
             updatedStock.value = updatedStock.quantity * oldStock.purchasePrice;
             decimal currentMone = decimal.Parse(Regex.Replace(availFunds.Text, @"^[$]|%$", string.Empty));
 
+
             availFunds.ResetText();
             availFunds.Text = (currentMone + (quantityStockSell.Value * decimal.Parse(Regex.Replace(soldPriceLbl.Text, @"^[$]|%$", string.Empty)))).ToString("C2", CultureInfo.CurrentCulture);
 
             stocksOwned.Remove(key);
             if (updatedStock.quantity > 0)
+            {
                 stocksOwned.Add(key, updatedStock);
+                stockOwnedListBox.SelectedIndex = stockOwnedListBox.SelectedIndex;
+            }
             else
             {
-                int currIn = stockOwnedListBox.SelectedIndex;
                 stockOwnedListBox.Items.Remove(companyNameSell);
-                if (stockOwnedListBox.Items.Count == 0)
-                {
-                    stockOwnedListBox.SelectedIndex = -1;
-                }
-                else if (currIn == (stockOwnedListBox.Items.Count - 1))
-                {
-                    stockOwnedListBox.SelectedIndex = currIn - 1;
-                }
-                else
-                {
-                    stockOwnedListBox.SelectedIndex = currIn + 1;
-                }
+                stockOwnedListBox.SelectedIndex = -1;
             }
-            //add more label things here below
-            quantOwnLbl.Text = stocksOwned[key].quantity.ToString();//testing
+
+            quantOwnLbl.ResetText();
+            purchasePriceLbl.ResetText();
+            curPriceLbl.ResetText();
+            initialValLbl.ResetText();
+            currValLbl.ResetText();
+            gainLossLbl.ResetText();
+            soldPriceLbl.ResetText();
+            totalSoldValLbl.ResetText();
+
             this.Refresh();
         }
 
-        private void quantityStockSell_ValueChanged(object sender, EventArgs e)
-        {
-            if (quantityStockSell.Value > decimal.Parse(Regex.Replace((quantOwnLbl.Text), @"^[$]|%$", string.Empty)))
-            {
-                MessageBox.Show("You do not own this many stocks!");
-                quantityStockSell.Value = decimal.Parse(Regex.Replace((quantOwnLbl.Text), @"^[$]|%$", string.Empty));
-                totalSoldValLbl.Text = (quantityStockSell.Value * decimal.Parse(Regex.Replace((soldPriceLbl.Text.ToString()), @"^[$]|%$", string.Empty))).ToString("C2", CultureInfo.CurrentCulture);
-            }
-            else
-                totalSoldValLbl.Text = (quantityStockSell.Value * decimal.Parse(Regex.Replace((soldPriceLbl.Text.ToString()), @"^[$]|%$", string.Empty))).ToString("C2", CultureInfo.CurrentCulture);
-            totalSoldValLbl.Visible = true;
-        }
 
         private void FakeStockPurchaser_FormClosed(object sender, FormClosedEventArgs e)
         {
-            string fileUserName = NewUserForm.existingUserFileName.Substring(0, NewUserForm.existingUserFileName.IndexOf('_'));
             m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
             m_dbConnection.Open();
-            foreach (String temp in stocksOwned.Keys)
+            foreach (string temp in stocksOwned.Keys)
             {
                 StockItem hold = stocksOwned[temp];
 
@@ -341,14 +330,25 @@ namespace Senior_Project_Stock_Tracker
 
 
                 sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds)" +
-                    " values (" + idTest + ",'" + fileUserName + "','" + hold.name + "','" + hold.symbol + "'," + hold.quantity + ",'" + hold.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + hold.value.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + availFunds.Text + "')";
-
+                    " values (" + idTest + ",'" + userName + "','" + hold.name + "','" + hold.symbol + "'," + hold.quantity + ",'" + hold.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + hold.value.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + availFunds.Text + "')";
+                Console.WriteLine(sql);
                 command = new SQLiteCommand(sql, m_dbConnection);
                 command.ExecuteNonQuery();
             }
             m_dbConnection.Close();
         }
+
+        private void quantityStockSell_ValueChanged(object sender, EventArgs e)
+        {
+            if (quantityStockSell.Value > decimal.Parse(Regex.Replace(quantOwnLbl.Text, @"^[$]|%$", string.Empty)))
+            {
+                MessageBox.Show("You do not own that much stock!");
+                quantityStockSell.Value = decimal.Parse(Regex.Replace(quantOwnLbl.Text, @"^[$]|%$", string.Empty));
+            }
+            else
+            {
+                totalSoldValLbl.Text = (quantityStockSell.Value * decimal.Parse(Regex.Replace(soldPriceLbl.Text, @"^[$]|%$", string.Empty))).ToString("C2", CultureInfo.CurrentCulture);
+            }
+        }
     }
-
-
 }

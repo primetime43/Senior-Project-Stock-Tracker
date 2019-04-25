@@ -99,7 +99,7 @@ namespace Senior_Project_Stock_Tracker
             this.Show();
         }
 
-        private static Boolean flag = true;
+        private static Boolean moreThanOneSymbolflag = true;
         private void companyListingslistBox_SelectedIndexChanged(object sender, EventArgs e)//load the companies into the listbox
         {
             if (companyListingslistBox.SelectedIndex == -1)//no item selected
@@ -110,17 +110,17 @@ namespace Senior_Project_Stock_Tracker
         }
 
         private static string selectedCompany;
-        private async Task checkForMultipleSymbols()
+        private async void checkForMultipleSymbols()//testing
         {
             selectedCompany = companyListingslistBox.GetItemText(companyListingslistBox.SelectedItem);
-            if (flag)//load the companies names into listbox
+            if (moreThanOneSymbolflag)//load the companies names into listbox (enter here if only one symbol)
             {
-                processSelectedCompany(selectedCompany);
+                processSelectedCompany(selectedCompany);//processes the company to check if the company has one or more symbols
             }
             else//load the symbols into the listbox for user to select one
             {
                 symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, selectedCompany, selectedTimeSeriesInterval);
-                flag = true;
+                moreThanOneSymbolflag = true;
                 loadCompaniesIntoListBox();//load companies back into the listbox after user selects desired symbol
                 displayAdditionalInfo(selectedCompany);
             }
@@ -128,22 +128,25 @@ namespace Senior_Project_Stock_Tracker
             setComparedStocks();
         }
 
-        private void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
+        private async void processSelectedCompany(string selectedCompanyName)//takes in the company the user selected from the companylistbox
         {
+            //problem is that its losing the selected company
+            selectedCompany = companyListingslistBox.GetItemText(companyListingslistBox.SelectedItem);//testing
             if (mapNameToSymbol[selectedCompanyName].Count > 1)//selected company has more than one symbol (iterate through to check for more than 1 symbol)
             {
                 companyListingslistBox.Items.Clear();//clear the companies listbox to load the symbols
                 foreach (var listMember in mapNameToSymbol[selectedCompanyName])//mapped symbol to sector because symbols are unique values and some companies have multiple symbols in different sectors
                 {
+                    MessageBox.Show(selectedCompany);
                     companyListingslistBox.Items.Add(listMember);//load symbols into the listbox
-                    flag = false;//set flag to false to get into the else statement in checkForMultipleSymbols method 
+                    moreThanOneSymbolflag = false;//set flag to false to get into the else statement in checkForMultipleSymbols method 
                 }
             }
-            /*else//one symbol, search mapNameToSymbol to find symbol for company name
+            else//one symbol, search mapNameToSymbol to find symbol for company name
             {
-
-                //symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);
-            }*///from here, the json data is somehow lost (data is null without break point for some reason) (may be fixed, not 100% sure yet)
+                //this is needed for the more than one symbol route!
+                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompanyName][0], selectedTimeSeriesInterval);//testing
+            }//from here, the json data is somehow lost (data is null without break point for some reason) (may be fixed, not 100% sure yet)
             displayAdditionalInfo();
         }
 
@@ -262,8 +265,9 @@ namespace Senior_Project_Stock_Tracker
                     break;
             }
             updateDataComboBox(selectedTimeSeries);
-            if (selectedCompany != null)
-                checkForMultipleSymbols();
+            //not sure if this is needed below, will cause user to lose selected company and crash
+            /*if (selectedCompany != null)
+                checkForMultipleSymbols();*/
         }
 
         private void timeSeriesIntervalComboBox_SelectedIndexChanged(object sender, EventArgs e)//combobox that lists the time series intervals
@@ -287,8 +291,8 @@ namespace Senior_Project_Stock_Tracker
                     selectedTimeSeriesInterval = "60min";
                     break;
             }
-            if (selectedCompany != null)
-                checkForMultipleSymbols();
+            /*if (selectedCompany != null)
+                checkForMultipleSymbols();*/
         }
 
         //back bone for retrieving and loading data to the chart
@@ -319,7 +323,9 @@ namespace Senior_Project_Stock_Tracker
                     return;
                 }
                 else
+                {
                     loadSingleCompanyToChart();
+                }
             }
         }
 
@@ -875,6 +881,7 @@ namespace Senior_Project_Stock_Tracker
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
         {//the bug is the user must reselect the time series again or else the dates will not show (user must select new items in combobox to fix the bug.)
+
             cartesianChart1.Series.Add(new LineSeries
             {
                 Title = selectedCompany + " (" + symbol + ")",
@@ -893,7 +900,7 @@ namespace Senior_Project_Stock_Tracker
                 Labels = keys
             });
 
-            /*if (isVolume)
+            if (isVolume)
             {
                 cartesianChart1.AxisY.Add(new Axis
                 {
@@ -908,15 +915,15 @@ namespace Senior_Project_Stock_Tracker
                     Title = "Values",
                     LabelFormatter = value => value.ToString("C")
                 });
-            }*/
+            }
             //right side legend
             cartesianChart1.LegendLocation = LegendLocation.Bottom;
             isVolume = false;
+            
         }
 
         private void loadDataToChartComparing()//Axis and data labels are using array indexes instead of dates for some reason (same as above for intraday. Works for daily tho)
         {
-
             string[] keys1 = testingComp[0].keys;
             string[] keys2 = testingComp[1].keys;
             /*foreach (var item in keys1)

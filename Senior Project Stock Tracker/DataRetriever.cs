@@ -132,14 +132,14 @@ namespace Senior_Project_Stock_Tracker
             }
         }
 
-        private static String programPath = Directory.GetCurrentDirectory();
+        private static string programPath = Directory.GetCurrentDirectory();
         private static HttpClient httpClient = new HttpClient();
         public string timeSeriesFlag;
 
         protected static async Task<string> retrieveSymbolData(string timeSeries, string stockSymbol, string interval)
         {
-            String urlString = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
-            //Console.WriteLine(urlString);
+            string urlString = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
+            Console.WriteLine(urlString);
             var json = await httpClient.GetAsync(urlString);
             return await json.Content.ReadAsStringAsync();
         }

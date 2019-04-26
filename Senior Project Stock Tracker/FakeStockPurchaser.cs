@@ -30,26 +30,33 @@ namespace Senior_Project_Stock_Tracker
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
-            m_dbConnection.Open();
-            Console.WriteLine("Length at close: " + stocksOwned.Count);
-            foreach (string temp in stocksOwned.Keys)
+            try
             {
-                StockItem hold = stocksOwned[temp];
+                m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
+                m_dbConnection.Open();
+                Console.WriteLine("Length at close: " + stocksOwned.Count);
+                foreach (string temp in stocksOwned.Keys)
+                {
+                    StockItem hold = stocksOwned[temp];
 
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-                string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
-                string todaysDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                    SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                    string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
+                    string todaysDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
 
 
 
-                sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds)" +
-                    " values (" + idTest + ",'" + userName + "','" + hold.name + "','" + hold.symbol + "'," + hold.quantity + ",'" + hold.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + hold.value.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + availFunds.Text + "')";
-                Console.WriteLine(sql);
-                command = new SQLiteCommand(sql, m_dbConnection);
-                command.ExecuteNonQuery();
+                    sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds)" +
+                        " values (" + idTest + ",'" + userName + "','" + hold.name + "','" + hold.symbol + "'," + hold.quantity + ",'" + hold.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + hold.value.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + availFunds.Text + "')";
+                    Console.WriteLine(sql);
+                    command = new SQLiteCommand(sql, m_dbConnection);
+                    command.ExecuteNonQuery();
+                }
+                m_dbConnection.Close();
             }
-            m_dbConnection.Close();
+            catch
+            {
+                MessageBox.Show("Unable to perform this action");
+            }
         }
 
         public static double startingCash;
@@ -255,11 +262,10 @@ namespace Senior_Project_Stock_Tracker
             string startCash = "";
             string availableCash = "";
             string name = "";
-
             while (reader.Read())
             {
 
-                Console.WriteLine("transID: " + reader["transID"] + " name: " + reader["name"] + " companyName: " + reader["companyName"] + " stockSymbol: " + reader["stockSymbol"] + " quantityPurchased: " + reader["quantityPurchased"] + " purchasePrice: " + reader["purchasePrice"] + " totalCost: " + reader["totalCost"] + " lastTransDate: " + reader["lastTransDate"] + " startingMoney: " + reader["startingMoney"] + " availableFunds: " + reader["availableFunds"]);
+                Console.WriteLine("Reading DB test: " + "transID: " + reader["transID"] + " name: " + reader["name"] + " companyName: " + reader["companyName"] + " stockSymbol: " + reader["stockSymbol"] + " quantityPurchased: " + reader["quantityPurchased"] + " purchasePrice: " + reader["purchasePrice"] + " totalCost: " + reader["totalCost"] + " lastTransDate: " + reader["lastTransDate"] + " startingMoney: " + reader["startingMoney"] + " availableFunds: " + reader["availableFunds"]);
 
                 StockItem current = new StockItem();
                 name = reader["name"].ToString();
@@ -267,11 +273,11 @@ namespace Senior_Project_Stock_Tracker
                 current.purchasePrice = double.Parse(Regex.Replace(reader["purchasePrice"].ToString(), @"^[$]|%$", string.Empty));
                 current.quantity = Convert.ToInt32(reader["quantityPurchased"]);
                 current.symbol = reader["stockSymbol"].ToString();
-                current.value = double.Parse(Regex.Replace((reader["totalCost"].ToString()), @"^[$]|%$", string.Empty));
+                current.value = double.Parse(Regex.Replace(reader["totalCost"].ToString(), @"^[$]|%$", string.Empty));
 
                 stockOwnedListBox.Items.Add(current.name);
                 stocksOwned.Add(current.symbol, current);
-                startCash = reader["startingMoney"].ToString();
+                startCash = reader["startingMoney"].ToString();//crashing right here it seems
                 startingCash = double.Parse(Regex.Replace(startCash, @"^[$]|%$", string.Empty));
 
                 availableCash = reader["availableFunds"].ToString();

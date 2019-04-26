@@ -23,6 +23,33 @@ namespace Senior_Project_Stock_Tracker
                 createUserDB();
             else
                 readExistingUserDB();
+
+            //testing
+            this.FormClosing += Form1_FormClosing;
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
+            m_dbConnection.Open();
+            Console.WriteLine("Length at close: " + stocksOwned.Count);
+            foreach (string temp in stocksOwned.Keys)
+            {
+                StockItem hold = stocksOwned[temp];
+
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
+                string todaysDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+
+
+
+                sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds)" +
+                    " values (" + idTest + ",'" + userName + "','" + hold.name + "','" + hold.symbol + "'," + hold.quantity + ",'" + hold.purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + hold.value.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + availFunds.Text + "')";
+                Console.WriteLine(sql);
+                command = new SQLiteCommand(sql, m_dbConnection);
+                command.ExecuteNonQuery();
+            }
+            m_dbConnection.Close();
         }
 
         public static double startingCash;
@@ -94,7 +121,7 @@ namespace Senior_Project_Stock_Tracker
             string idTest = string.Format(@"{0}", DateTime.Now.Ticks);
             double totalCost = Convert.ToInt32(numericUpDown1.Value) * currentStockPrice;
 
-            sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds) values (" + idTest + ",'" + NewUserForm.name + "','" + nameOfSelectedCompany + "','" + stockSymbolLbl.Text + "'," + Convert.ToInt32(numericUpDown1.Value) + ",'" + purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + totalCost.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + currentCash.ToString("C2", CultureInfo.CurrentCulture) + "')";
+            sql = "insert into userDatabase (transID, name, companyName, stockSymbol, quantityPurchased, purchasePrice, totalCost, lastTransDate, startingMoney, availableFunds) values (" + idTest + ",'" + userName + "','" + nameOfSelectedCompany + "','" + stockSymbolLbl.Text + "'," + Convert.ToInt32(numericUpDown1.Value) + ",'" + purchasePrice.ToString("C2", CultureInfo.CurrentCulture) + "','" + totalCost.ToString("C2", CultureInfo.CurrentCulture) + "','" + todaysDate + "','" + startingCash.ToString("C2", CultureInfo.CurrentCulture) + "','" + currentCash.ToString("C2", CultureInfo.CurrentCulture) + "')";
 
             command = new SQLiteCommand(sql, m_dbConnection);
             command.ExecuteNonQuery();
@@ -315,7 +342,7 @@ namespace Senior_Project_Stock_Tracker
         }
 
 
-        private void FakeStockPurchaser_FormClosed(object sender, FormClosedEventArgs e)
+        /*private void FakeStockPurchaser_FormClosed(object sender, FormClosedEventArgs e)
         {
             m_dbConnection = new SQLiteConnection("Data Source=" + NewUserForm.usersPath + "\\" + NewUserForm.existingUserFileName + ".sqlite" + "; Version=3;");
             m_dbConnection.Open();
@@ -336,7 +363,7 @@ namespace Senior_Project_Stock_Tracker
                 command.ExecuteNonQuery();
             }
             m_dbConnection.Close();
-        }
+        }*/
 
         private void quantityStockSell_ValueChanged(object sender, EventArgs e)
         {

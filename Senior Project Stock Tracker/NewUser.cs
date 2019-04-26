@@ -22,7 +22,8 @@ namespace Senior_Project_Stock_Tracker
             {
                 string[] files = Directory.GetFiles(usersPath);
                 foreach (string fileName in files)
-                    existingUsersListBox.Items.Add(Path.GetFileName(fileName).Substring(0, Path.GetFileName(fileName).IndexOf('.')));
+                    if (Path.GetFileName(fileName).Length > 10)
+                        existingUsersListBox.Items.Add(Path.GetFileName(fileName).Substring(0, Path.GetFileName(fileName).IndexOf('.')));
             }
         }
         public static string name = "";

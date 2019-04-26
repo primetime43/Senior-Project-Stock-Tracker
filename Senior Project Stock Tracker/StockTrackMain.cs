@@ -7,7 +7,6 @@ using System.Windows;
 using System.Linq;
 using System.Net.Http;
 using System.IO;
-using System.Threading.Tasks;
 
 //API Key: X0REJIV6R6ROZS3T
 //News API Key: 94b9e25568ca4ee3bef44fc4c7ae335e
@@ -880,7 +879,7 @@ namespace Senior_Project_Stock_Tracker
         }
 
         private void loadDataToChart(string symbol, double[] values, string[] keys)
-        {//the bug is the user must reselect the time series again or else the dates will not show (user must select new items in combobox to fix the bug.)
+        {//bg having to do with the dates. Seems to fix when select the company first then select parameters
 
             cartesianChart1.Series.Add(new LineSeries
             {
@@ -888,10 +887,10 @@ namespace Senior_Project_Stock_Tracker
                 Values = new ChartValues<double>(values),
             });
 
-            foreach (var item in keys)
+            /*foreach (var item in keys)
             {
                 Console.WriteLine("Keys: " + item.ToString());
-            }
+            }*/
 
             //bottom x axis labels
             cartesianChart1.AxisX.Add(new Axis
@@ -1116,11 +1115,3 @@ namespace Senior_Project_Stock_Tracker
         }
     }
 }
-/*
- * TODO:
- * add ability to compare stocks on chart (needs fixed)
- * add daily high & low and 52 weeks high & low (not sure where to get this data from, may scratch idea)
- * */
-
-//super weird bug having to do with searching a company then trying to display chart without focusing on another object on form. Doesn't seem to occur always.
-//there is a bug where if while trying to compare stocks and an api limit is reached, it will lose the second companying being compared and will compare the first company to itself. Can be fixed by unchecking and rechecking company box two

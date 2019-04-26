@@ -30,36 +30,23 @@ namespace Senior_Project_Stock_Tracker
         RootObject test1 = null;
         private async void PopulateListView()
         {
-            //selectedCompany = selectedCompany.Replace(' ', '-');
-            Console.WriteLine("Company: " + selectedCompany);
             //var json = await httpClient.GetAsync("https://newsapi.org/v2/top-headlines?country=us&apiKey=94b9e25568ca4ee3bef44fc4c7ae335e");
             var json = await httpClient.GetAsync("https://newsapi.org/v2/everything?q=" + selectedCompany + "&language=en&sortBy=popularity&apiKey=94b9e25568ca4ee3bef44fc4c7ae335e");
             var jsonAsString = await json.Content.ReadAsStringAsync();
 
             test1 = JsonConvert.DeserializeObject<RootObject>(jsonAsString);
             ImageList images = new ImageList();
-            //Console.WriteLine("Size: " + test1.articles.Count);
-            int numOfArticles = 0;
-            if (test1.articles.Count >= 10)
+            int articleIndex = test1.articles.Count;
+            for (int i = 0; i < articleIndex; i++)
             {
-                numOfArticles = 10;
-                //MessageBox.Show("Here");
-            }
-            else
-                numOfArticles = test1.articles.Count;
-
-            //Console.WriteLine("Num set to: " + numOfArticles);
-            int articleIndex = 0;
-            for (int i = 0; i < numOfArticles; i++)
-            {
-                if (test1.articles[i].urlToImage != null)
+                if (test1.articles[i].url != null)
                 {
-                    newsDisplayListView.Items.Add(test1.articles[i].title, articleIndex);
-                    images.Images.Add(LoadImage(test1.articles[i].urlToImage));
-                    images.ImageSize = new Size(220, 165);
-                    newsDisplayListView.LargeImageList = images;
-                    articleIndex++;
-                    //Console.WriteLine(articleIndex.ToString());
+                    listBox1.Items.Add(test1.articles[i].title);
+                    if (test1.articles[i].urlToImage != null)
+                    {
+                        images.Images.Add(LoadImage(test1.articles[i].urlToImage));
+                        images.ImageSize = new Size(220, 165);
+                    }
                 }
             }
         }
@@ -72,33 +59,6 @@ namespace Senior_Project_Stock_Tracker
             Bitmap bmp = new Bitmap(responseStream);
             responseStream.Dispose();
             return bmp;
-        }
-
-        //needs fixed.
-        //To fix: crash occurs when user tries to select a different article after selecting the first one in the listview
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //MessageBox.Show("Here");
-            for (int i = 0; i < test1.articles.Count; i++)
-            {
-                //MessageBox.Show("Here 2");
-                //crashing right after this
-                //Console.WriteLine("Selected Item: " + listView1.SelectedItems[0].Text);
-                try
-                {
-                    //Console.WriteLine("Test: " + newsDisplayListView.SelectedIndices[0]);
-                    if (test1.articles[i].title == newsDisplayListView.SelectedItems[0].Text)
-                    {
-                        //MessageBox.Show("Here 3");
-                        webBrowser1.Navigate(new Uri(test1.articles[i].url));
-                        break;
-                    }
-                }
-                catch (IndexOutOfRangeException t)
-                {
-                    Console.WriteLine("Error: " + t.Message);
-                }
-            }
         }
 
         public class RootObject
@@ -130,6 +90,27 @@ namespace Senior_Project_Stock_Tracker
         {
             StockTrackMain main = new StockTrackMain();
             main.ShowDialog();
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            for (int i = 0; i < test1.articles.Count; i++)
+            {
+                try
+                {
+                    if (test1.articles[i].title == listBox1.SelectedItem.ToString())
+                    {
+                        webBrowser1.Visible = true;
+                        pictureBox1.Load(test1.articles[i].urlToImage);
+                        webBrowser1.Navigate(new Uri(test1.articles[i].url));
+                        break;
+                    }
+                }
+                catch (IndexOutOfRangeException t)
+                {
+                    Console.WriteLine("Error: " + t.Message);
+                }
+            }
         }
     }
 }

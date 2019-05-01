@@ -136,7 +136,7 @@ namespace Senior_Project_Stock_Tracker
                 companyListingslistBox.Items.Clear();//clear the companies listbox to load the symbols
                 foreach (var listMember in mapNameToSymbol[selectedCompanyName])//mapped symbol to sector because symbols are unique values and some companies have multiple symbols in different sectors
                 {
-                    MessageBox.Show(selectedCompany);
+                    //MessageBox.Show(selectedCompany);
                     companyListingslistBox.Items.Add(listMember);//load symbols into the listbox
                     moreThanOneSymbolflag = false;//set flag to false to get into the else statement in checkForMultipleSymbols method 
                 }
@@ -313,7 +313,7 @@ namespace Senior_Project_Stock_Tracker
                 compareStocks();
             else//no comparing, just load the single stock on the graph
             {
-                symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompany][0], selectedTimeSeriesInterval);
+                //symbolJSONreturn = await retrieveSymbolData(selectedTimeSeries, mapNameToSymbol[selectedCompany][0], selectedTimeSeriesInterval);//think this fixes the weird bug** yep it fixes it
                 ExceededReq notify = new ExceededReq();
                 notify = JsonConvert.DeserializeObject<ExceededReq>(symbolJSONreturn);
                 if (notify != null && notify.Note != null || notify.Note == "")//for when the api notifies user must wait to make more request due to free api restrictions (bug, crashing here sometimes)

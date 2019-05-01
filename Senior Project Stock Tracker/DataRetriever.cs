@@ -138,6 +138,7 @@ namespace Senior_Project_Stock_Tracker
 
         protected static async Task<string> retrieveSymbolData(string timeSeries, string stockSymbol, string interval)
         {
+            //MessageBox.Show("Here");
             string urlString = "https://www.alphavantage.co/query?function=" + timeSeries + "&symbol=" + stockSymbol + "&interval=" + interval + "&apikey=X0REJIV6R6ROZS3T";
             Console.WriteLine(urlString);
             var json = await httpClient.GetAsync(urlString);

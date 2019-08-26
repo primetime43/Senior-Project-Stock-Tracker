@@ -25,7 +25,7 @@ The JSON data that was pulled deserialized into an object:
 Deserialized data into an object:
 ![Stock symbol deserialized data](https://i.imgur.com/1w5A7KS.png)
 
-Some code for storing the data:
+Some code for storing the data:<br>
 ![Code for storing data](https://i.imgur.com/SiFflEM.png)
 ![Code for storing data](https://i.imgur.com/ewZn4sZ.png)
 ![Code for storing data](https://i.imgur.com/YjeJmFz.png)

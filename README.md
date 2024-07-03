@@ -1,4 +1,5 @@
 # Senior-Project-Stock-Tracker
+Uses the following api https://www.alphavantage.co/
 
 Examples of the program:
 
